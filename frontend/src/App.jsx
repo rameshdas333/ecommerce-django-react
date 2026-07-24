@@ -1,47 +1,15 @@
 
-import { useState,useEffect} from 'react'
+
+import ProductList from './components/ProductList.jsx'
 
 
 
-function App() {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/products/')
-      .then(response => response.json())
-      .then(data => setProducts(data))
-      .catch(error => console.error( error));
-  }, []);
+const App = () => {
 
   return (
    <>
  <div className="min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold underline text-center text-red-500">
-        Product List
-      </h1>
-
-      <div className="container mx-auto p-4">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white p-4 rounded shadow mb-4"
-          >
-            <h2 className="text-xl font-semibold">
-              {product.name}
-            </h2>
-
-            <p className="text-gray-600">
-              {product.description}
-            </p>
-
-            <img src={product.image} alt={product.name} className="w-32 h-32 object-cover mt-2" />
-
-            <p className="text-gray-800 font-bold">
-              ${product.price}
-            </p>
-          </div>
-        ))}
-      </div>
+      <ProductList />
     </div>
    </>
   )
