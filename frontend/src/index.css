@@ -1,2 +1,15 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+.swiper-pagination-bullet {
+  width: 12px !important;
+  height: 12px !important;
+  background: white !important;
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  width: 12px !important;
+  height: 12px !important;
+  background: red !important;
+}

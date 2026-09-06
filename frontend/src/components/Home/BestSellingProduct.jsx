@@ -15,9 +15,9 @@ const BestSellingProduct = () => {
       <div
         className="
           relative
-          pt-8
-          sm:pt-10
-          md:pt-12
+          pt-4
+          sm:pt-4
+          md:pt-6
           pb-12
           sm:pb-16
           md:pb-20
@@ -134,11 +134,11 @@ const BestSellingProduct = () => {
 
             <div className="flex items-center">
               <p className="font-primary font-medium text-base text-primary1">
-                $260
+                BDT 260
               </p>
 
               <del className="font-primary font-medium text-base ml-2">
-                $360
+                BDT 360
               </del>
             </div>
 
@@ -202,11 +202,11 @@ const BestSellingProduct = () => {
 
             <div className="flex items-center">
               <p className="font-primary font-medium text-base text-primary1">
-                $960
+                BDT 960
               </p>
 
               <del className="font-primary font-medium text-base ml-2">
-                $1160
+                BDT 1160
               </del>
             </div>
 
@@ -270,11 +270,11 @@ const BestSellingProduct = () => {
 
             <div className="flex items-center">
               <p className="font-primary font-medium text-base text-primary1">
-                $160
+                BDT 160
               </p>
 
               <del className="font-primary font-medium text-base ml-2">
-                $170
+                BDT 170
               </del>
             </div>
 
@@ -338,7 +338,7 @@ const BestSellingProduct = () => {
 
             <div className="flex items-center">
               <p className="font-primary font-medium text-base text-primary1">
-                $360
+                BDT 360
               </p>
             </div>
 

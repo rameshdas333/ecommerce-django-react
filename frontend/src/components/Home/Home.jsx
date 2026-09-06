@@ -1,6 +1,11 @@
 import React from 'react'
 import {useState, useEffect} from 'react'
 import BestSellingProduct from '../Home/BestSellingProduct.jsx';
+import MusicExperience from './MusicExprience.jsx';
+import NewArrival from './NewArrival.jsx';
+import OurProducts from './OurProducts.jsx';
+import BrowseCategory from './BrowseCategory.jsx';
+import Banner from './Banner.jsx';
 
 
 
@@ -17,10 +22,13 @@ const Home = () => {
   }, []);
   return (
     <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-       <h1 className=''>Welcome to the React Frontend!</h1>
-     <h1 className="">{message} || Loading...</h1>
+     <Banner/>
+     <BrowseCategory/>
      <BestSellingProduct/>
-   
+     <MusicExperience/>
+      <OurProducts/>
+     <NewArrival/>
+    
     </div>
   )
 }
