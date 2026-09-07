@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-jvwn+s7e+5q1ossk85n2)*@-2dt$92oh+5k^-)rwbybxt42r^5
 DEBUG = True
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
-    "ecommerce-django-react-3-6qz3.onrender.com",
+    "ecommerce-django-react-2.onrender.com",
     "localhost",
     "127.0.0.1",
 ]
