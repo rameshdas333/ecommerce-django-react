@@ -28,9 +28,9 @@ SECRET_KEY = 'django-insecure-jvwn+s7e+5q1ossk85n2)*@-2dt$92oh+5k^-)rwbybxt42r^5
 DEBUG = True
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
-    "ecommerce-django-react-2.onrender.com",
-    "localhost",
-    "127.0.0.1",
+    # "ecommerce-django-react-2.onrender.com",
+    # "localhost",
+    # "127.0.0.1",
 ]
 
 
@@ -95,26 +95,26 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'ecommerce',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres123',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-
 DATABASES = {
-     "default":
-       { "ENGINE": "django.db.backends.postgresql", 
-        "NAME": os.environ.get("DB_NAME", "ecommerce"),
-          "USER": os.environ.get("DB_USER", "postgres"),
-            "PASSWORD": os.environ.get("DB_PASSWORD", "postgres123"),
-              "HOST": os.environ.get("DB_HOST", "localhost"), 
-              "PORT": os.environ.get("DB_PORT", "5432"), } }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ecommerce',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres123',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
+
+# DATABASES = {
+#      "default":
+#        { "ENGINE": "django.db.backends.postgresql", 
+#         "NAME": os.environ.get("DB_NAME", "ecommerce"),
+#           "USER": os.environ.get("DB_USER", "postgres"),
+#             "PASSWORD": os.environ.get("DB_PASSWORD", "postgres123"),
+#               "HOST": os.environ.get("DB_HOST", "localhost"), 
+#               "PORT": os.environ.get("DB_PORT", "5432"), } }
 
 
 # Password validation

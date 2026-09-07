@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cart, CartItem, Product, Category, Order, OrderItem,Size,Color
+from .models import Cart, CartItem, Product, Category, Order, OrderItem,Size
 from django.contrib.auth.models import User
 
 
@@ -13,10 +13,7 @@ class SizeSerializer(serializers.ModelSerializer):
         model = Size
         fields = ["id", "size"]    
 
-class ColorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Color
-        fields = ["id", "color"]
+
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     sizes = SizeSerializer(
@@ -24,10 +21,6 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    colors = ColorSerializer(
-        many=True,
-        read_only=True
-    )
 
     class Meta:
         model = Product
@@ -172,7 +165,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        # name আলাদা করে নিন
+        # name 
         name = validated_data.pop("name")
 
         user = User.objects.create_user(

@@ -70,29 +70,6 @@ class Size(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.size}"
 
-class Color(models.Model):
-
-    COLOR_CHOICES = [
-        ("White", "White"),
-        ("Black", "Black"),
-        ("Blue", "Blue"),
-    ]
-
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name="colors"
-    )
-
-    color = models.CharField(
-        max_length=50,
-        choices=COLOR_CHOICES,
-        blank=True,
-        null=True
-    )
-
-    def __str__(self):
-        return f"{self.product.name} - {self.color}"
 
 class Order(models.Model):
 
