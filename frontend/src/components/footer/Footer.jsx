@@ -2,6 +2,8 @@ import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/f
 // import App from '../../assets/APP.png'
 // import Qrcode from '../../assets/Qrcode 1.png'
 import { FiSend } from 'react-icons/fi';
+import ssllogo from '../../assets/ssl-logo.png';
+import sslcommerz from '../../assets/SSL-commerz.png';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
@@ -68,16 +70,16 @@ export default function Footer() {
 
         {/* Download App */}
         <div>
-          <h3 className="font-semibold mb-4">Download App</h3>
-          <p className="text-sm mb-4">Save $3 with App New User Only</p>
-          <div className="flex gap-2 mb-4">
-            <img src={``} alt="QR Code" className="w-16" />
-            <div className="flex flex-col gap-2">
-              <img src={``} alt="Google Play" className="w-24" />
+          <h3 className="font-semibold mb-4">Pay with</h3>
+         
+          <div className=" gap-2 mb-4">
+            <img src={ssllogo} alt="SSL Logo" className="w-28" /> 
+            
+            <img src={sslcommerz} alt="SSL Commerz" className="w-100 lg:py-3" />
              
-            </div>
+            
           </div>
-          <div className="flex space-x-3 mt-4 text-white text-lg">
+          <div className="flex space-x-3 mt-4 cursor-pointer text-white text-lg">
             <FaFacebookF />
             <FaTwitter />
             <FaInstagram />

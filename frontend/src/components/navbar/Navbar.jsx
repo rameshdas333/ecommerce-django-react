@@ -112,7 +112,7 @@ const Navbar = () => {
   );
 
   return (
-    <div className="navbar w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 bg-base-100 shadow-sm">
+    <div className="navbar sticky top-0 z-50 bg-[#CDE4EA]  w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16  shadow-sm">
       
       {/* Navbar Start */}
       <div className="navbar-start">
