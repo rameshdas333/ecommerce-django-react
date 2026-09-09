@@ -13,6 +13,7 @@ from .models import Order
 from .serializers import OrderSerializer
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.filters import SearchFilter
 from django.utils.http import (
     urlsafe_base64_encode,
     urlsafe_base64_decode,
@@ -22,9 +23,25 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 
 # All Products
+# @api_view(["GET"])
+# def get_product(request):
+#     products = Product.objects.all()
+#     serializer = ProductSerializer(products, many=True)
+#     return Response(serializer.data)
+
 @api_view(["GET"])
 def get_product(request):
     products = Product.objects.all()
+
+    search = request.GET.get("search")
+
+    if search:
+        products = products.filter(
+            name__icontains=search
+        ) | products.filter(
+            description__icontains=search
+        )
+
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 

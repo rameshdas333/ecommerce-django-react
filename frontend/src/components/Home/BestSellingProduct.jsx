@@ -34,7 +34,7 @@ const BestSellingProduct = () => {
       >
         {/* ================= TITLE ================= */}
 
-        <div className="mb-8 sm:mb-10 md:mb-12">
+        <div className="mb-7 sm:mb-10 md:mb-12">
           <div
             className="
               [&_h1]:text-2xl
