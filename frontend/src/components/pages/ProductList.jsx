@@ -279,7 +279,7 @@ const ProductList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-gray-100 py-7">
 
       {/* Title */}
      
