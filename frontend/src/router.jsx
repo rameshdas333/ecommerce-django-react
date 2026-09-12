@@ -11,6 +11,7 @@ import Login from "./components/authLayout/Login.jsx";
 import Register from "./components/authLayout/Register.jsx";
 import ForgotPassword from "./components/authLayout/ForgotPassword.jsx";
 import ResetPassword from "./components/authLayout/ResetPassword.jsx";
+import About from "./components/pages/about/About.jsx";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
             path:"products/:id",
             element:<ProductDetails></ProductDetails>
 
+        },
+        {
+            path: "about",
+            element: <About>About Page</About>,
         },
 
         {

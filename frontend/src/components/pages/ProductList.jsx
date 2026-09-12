@@ -185,7 +185,7 @@
 //               className="
 //                 inline-block
 //                 mt-4
-//                 bg-blue-600
+//                 bg-[#C74500]
 //                 text-white
 //                 px-4
 //                 py-2
@@ -210,13 +210,18 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import {
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar,
+} from "react-icons/fa";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // URL থেকে search নেওয়া
+  // URL from search
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
 
@@ -226,8 +231,8 @@ const ProductList = () => {
     setLoading(true);
     setError(null);
 
-    // Search থাকলে search API
-    // Search না থাকলে normal API
+    // Search thakle search API
+    // Search na thakle normal API
     const url = search
       ? `${BASEURL}/api/products/?search=${encodeURIComponent(search)}`
       : `${BASEURL}/api/products/`;
@@ -281,9 +286,6 @@ const ProductList = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-7">
 
-      {/* Title */}
-     
-
       {/* Search Result Text */}
       {search && (
         <p className="text-center text-gray-600 mb-4">
@@ -303,59 +305,116 @@ const ProductList = () => {
         </div>
       ) : (
         /* Product Grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-4">
 
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="
-                bg-white
-                p-4
-                rounded-xl
-                shadow-md
+          {products.map((product) => {
 
-                transition-all
-                duration-300
-                ease-in-out
+            // Django theke rating
+            const rating = Number(product.rating || 0);
 
-                hover:-translate-y-2
-                hover:shadow-2xl
-              "
-            >
-              {/* Product Image */}
-              <img
-                src={`${BASEURL}${product.image}`}
-                alt={product.name}
-                className="w-full h-60 object-contain rounded mb-4"
-              />
-
-              {/* Product Name */}
-              <h2 className="text-xl font-semibold mb-2">
-                {product.name}
-              </h2>
-
-              {/* Price */}
-              <p className="text-lg text-green-600 mt-3">
-                ৳ {product.price}
-              </p>
-
-              {/* View Details */}
-              <Link
-                to={`/products/${product.id}`}
+            return (
+              <div
+                key={product.id}
                 className="
-                  inline-block
-                  mt-4
-                  bg-blue-600
-                  text-white
-                  px-4
-                  py-2
-                  rounded
+                  bg-white
+                  p-4
+                  rounded-xl
+                  shadow-md
+
+                  transition-all
+                  duration-300
+                  ease-in-out
+
+                  hover:-translate-y-2
+                  hover:shadow-2xl
                 "
               >
-                View Details
-              </Link>
-            </div>
-          ))}
+
+                {/* Product Image */}
+                <img
+                  src={`${BASEURL}${product.image}`}
+                  alt={product.name}
+                  className="w-full h-60 object-contain rounded mb-4"
+                />
+
+                {/* Product Name */}
+                <h2 className="text-xl font-semibold mb-2">
+                  {product.name}
+                </h2>
+
+                {/* Price + Rating Same Row */}
+                <div className="flex items-center justify-between mt-3">
+
+                  {/* Price */}
+                  <p className="text-lg text-green-600">
+                    ৳ {product.price}
+                  </p>
+
+                  {/* Rating */}
+                  <div className="flex items-center gap-1">
+
+                    {[1, 2, 3, 4, 5].map((star) => {
+
+                      // Full Star
+                      if (rating >= star) {
+                        return (
+                          <FaStar
+                            key={star}
+                            className="text-yellow-400 text-sm"
+                          />
+                        );
+                      }
+
+                      // Half Star
+                      if (rating >= star - 0.5) {
+                        return (
+                          <FaStarHalfAlt
+                            key={star}
+                            className="text-yellow-400 text-sm"
+                          />
+                        );
+                      }
+
+                      // Empty Star
+                      return (
+                        <FaRegStar
+                          key={star}
+                          className="text-gray-300 text-sm"
+                        />
+                      );
+                    })}
+
+                    {/* Rating Number */}
+                    <span className="text-xs text-gray-500 ml-1">
+                      ({rating.toFixed(1)})
+                    </span>
+
+                  </div>
+
+                </div>
+
+                {/* View Details */}
+                <Link
+                  to={`/products/${product.id}`}
+                  className="
+                  mx-auto
+                    block
+                    text-center
+                   
+                    mt-4
+                    bg-[#C74500]
+                    text-white
+                    px-4
+                    py-2
+                    rounded-full
+                  "
+                >
+                  View Details
+                </Link>
+
+              </div>
+            );
+          })}
 
         </div>
       )}
