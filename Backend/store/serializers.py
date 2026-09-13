@@ -16,19 +16,15 @@ class SizeSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
-    sizes = SizeSerializer(many=True, read_only=True)
-    image = serializers.SerializerMethodField()
+    sizes = SizeSerializer(
+        many=True,
+        read_only=True
+    )
+
 
     class Meta:
         model = Product
         fields = '__all__'
-
-    def get_image(self, obj):
-        request = self.context.get("request")
-        if obj.image:
-            return request.build_absolute_uri(obj.image.url)
-        return None
-
 
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
