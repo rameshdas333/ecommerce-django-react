@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import dj_database_url
 from datetime import timedelta
 import os
 from pathlib import Path
@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-jvwn+s7e+5q1ossk85n2)*@-2dt$92oh+5k^-)rwbybxt42r^5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
-    # "ecommerce-django-react-2.onrender.com",
-    # "localhost",
-    # "127.0.0.1",
+    "ecommerce-django-react-5.onrender.com",
+    "localhost",
+    "127.0.0.1",
 ]
 
 
@@ -100,15 +100,21 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'ecommerce',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres123',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ecommerce',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres123',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    "default": dj_database_url.config(
+        default="postgresql://postgres:postgres123@localhost:5432/ecommerce"
+    )
 }
 
 
