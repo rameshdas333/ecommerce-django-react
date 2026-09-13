@@ -111,21 +111,19 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 #     }
 # }
 
+
+# render > environment DATABASE_URL= renver internal database url (postgresdatabase render)
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgresql://postgres:postgres123@localhost:5432/ecommerce"
+        default=os.environ.get(
+            "DATABASE_URL",
+            "postgresql://postgres:postgres123@localhost:5432/ecommerce"
+        )
     )
 }
 
 
-# DATABASES = {
-#      "default":
-#        { "ENGINE": "django.db.backends.postgresql", 
-#         "NAME": os.environ.get("DB_NAME", "ecommerce"),
-#           "USER": os.environ.get("DB_USER", "postgres"),
-#             "PASSWORD": os.environ.get("DB_PASSWORD", "postgres123"),
-#               "HOST": os.environ.get("DB_HOST", "localhost"), 
-#               "PORT": os.environ.get("DB_PORT", "5432"), } }
+
 
 
 # Password validation
