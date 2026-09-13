@@ -31,19 +31,30 @@ from django.utils.encoding import force_bytes, force_str
 
 @api_view(["GET"])
 def get_product(request):
-    products = Product.objects.all()
+    try:
+        products = Product.objects.all()
 
-    search = request.GET.get("search")
+        search = request.GET.get("search")
 
-    if search:
-        products = products.filter(
-            name__icontains=search
-        ) | products.filter(
-            description__icontains=search
+        if search:
+            products = products.filter(
+                name__icontains=search
+            ) | products.filter(
+                description__icontains=search
+            )
+
+        serializer = ProductSerializer(products, many=True)
+
+        return Response(serializer.data)
+
+    except Exception as e:
+        return Response(
+            {
+                "error": str(e),
+                "error_type": type(e).__name__,
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
 
 
 # Single Product Details
