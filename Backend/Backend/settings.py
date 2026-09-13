@@ -115,22 +115,33 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 
 import os
 import dj_database_url
+from pathlib import Path
 
-if os.environ.get("DATABASE_URL"):
-    DATABASES = {
-        'default': dj_database_url.config(default=os.environ["DATABASE_URL"])
-    }
-else:
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Default: use DATABASE_URL if available (Render/PostgreSQL)
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
+
+# Fallback: local PostgreSQL for development
+if not os.environ.get("DATABASE_URL"):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'ecommerce',
-            'USER': 'postgres',
-            'PASSWORD': 'postgres123',
+            'NAME': 'ecommerce',          # তোমার local DB নাম
+            'USER': 'postgres',           # তোমার local user
+            'PASSWORD': 'postgres123',    # তোমার local password
             'HOST': 'localhost',
             'PORT': '5432',
         }
     }
+
+
 
 
 
