@@ -101,26 +101,37 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ecommerce',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres123',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
-
 # DATABASES = {
-#      "default":
-#        { "ENGINE": "django.db.backends.postgresql", 
-#         "NAME": os.environ.get("DB_NAME", "ecommerce"),
-#           "USER": os.environ.get("DB_USER", "postgres"),
-#             "PASSWORD": os.environ.get("DB_PASSWORD", "postgres123"),
-#               "HOST": os.environ.get("DB_HOST", "localhost"), 
-#               "PORT": os.environ.get("DB_PORT", "5432"), } }
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'ecommerce',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres123',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+
+import os
+import dj_database_url
+
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ["DATABASE_URL"])
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'ecommerce',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres123',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
+
 
 
 # Password validation
