@@ -31,7 +31,9 @@ ALLOWED_HOSTS = [
     "ecommerce-django-react-1-pxg8.onrender.com",
     "localhost",
     "127.0.0.1",
+    "ecommerce-django-react-gules.vercel.app"
 ]
+
 
 
 # Application definition
@@ -160,8 +162,14 @@ USE_TZ = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://ecommerce-django-react-gules.vercel.app"
+    "https://ecommerce-django-react-gules.vercel.app",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = False  # নিরাপত্তার জন্য False রাখো
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
+
 
 
 # Static files (CSS, JavaScript, Images)
