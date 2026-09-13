@@ -14,6 +14,8 @@ from datetime import timedelta
 import os
 from pathlib import Path
 
+from django.db.backends import postgresql
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +30,7 @@ SECRET_KEY = 'django-insecure-jvwn+s7e+5q1ossk85n2)*@-2dt$92oh+5k^-)rwbybxt42r^5
 DEBUG = False
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
-    "ecommerce-django-react-1-pxg8.onrender.com",
+     "ecommerce-django-react-9.onrender.com",
     "localhost",
     "127.0.0.1",
     "ecommerce-django-react-gules.vercel.app"
@@ -115,15 +117,15 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 
 
 # render > environment DATABASE_URL= renver internal database url (postgresdatabase render)
-import dj_database_url
+
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True,
+    'default': dj_database_url.config(
+        default=os.environ.get("DATABASE_URL")
     )
 }
+
+
 
 
 
