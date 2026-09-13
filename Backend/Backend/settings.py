@@ -9,12 +9,10 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-import dj_database_url
+
 from datetime import timedelta
 import os
 from pathlib import Path
-
-from django.db.backends import postgresql
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,15 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-jvwn+s7e+5q1ossk85n2)*@-2dt$92oh+5k^-)rwbybxt42r^5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
-     "ecommerce-django-react-1-c6ro.onrender.com",
-    "localhost",
-    "127.0.0.1",
-    "ecommerce-django-react-gules.vercel.app"
+    # "ecommerce-django-react-2.onrender.com",
+    # "localhost",
+    # "127.0.0.1",
 ]
-
 
 
 # Application definition
@@ -104,31 +100,26 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'ecommerce',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres123',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-
-# render > environment DATABASE_URL= renver internal database url (postgresdatabase render)
-
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get("DATABASE_URL")
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ecommerce',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres123',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 
-
-
-
+# DATABASES = {
+#      "default":
+#        { "ENGINE": "django.db.backends.postgresql", 
+#         "NAME": os.environ.get("DB_NAME", "ecommerce"),
+#           "USER": os.environ.get("DB_USER", "postgres"),
+#             "PASSWORD": os.environ.get("DB_PASSWORD", "postgres123"),
+#               "HOST": os.environ.get("DB_HOST", "localhost"), 
+#               "PORT": os.environ.get("DB_PORT", "5432"), } }
 
 
 # Password validation
@@ -164,14 +155,8 @@ USE_TZ = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://ecommerce-django-react-gules.vercel.app",
+    "https://ecommerce-django-react-gules.vercel.app"
 ]
-
-CORS_ALLOW_ALL_ORIGINS = False  # নিরাপত্তার জন্য False রাখো
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://.*\.vercel\.app$",
-]
-
 
 
 # Static files (CSS, JavaScript, Images)
