@@ -21,6 +21,9 @@ from django.utils.http import (
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
+from django.conf import settings
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 # All Products
 # @api_view(["GET"])
@@ -197,6 +200,68 @@ class LoginView(APIView):
             status=status.HTTP_200_OK
         )
 
+class GoogleLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        credential = request.data.get("credential")
+
+        if not credential:
+            return Response(
+                {"detail": "Google credential is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            google_user = id_token.verify_oauth2_token(
+                credential,
+                google_requests.Request(),
+                settings.GOOGLE_CLIENT_ID,
+            )
+        except ValueError:
+            return Response(
+                {"detail": "Invalid Google credential"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        email = google_user.get("email")
+        email_verified = google_user.get("email_verified", False)
+        name = google_user.get("name", "")
+
+        if not email or not email_verified:
+            return Response(
+                {"detail": "Google email is not verified"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        user = User.objects.filter(email__iexact=email).first()
+
+        # User না থাকলে automatically register
+        if user is None:
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                first_name=name,
+            )
+            user.set_unusable_password()
+            user.save()
+
+        # JWT তৈরি
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "message": "Google login successful",
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "name": user.first_name,
+                    "email": user.email,
+                },
+            },
+            status=status.HTTP_200_OK
+        )
 
 class ForgotPasswordView(APIView):
     def post(self, request):

@@ -133,9 +133,9 @@ if not os.environ.get("DATABASE_URL"):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'ecommerce',          # তোমার local DB নাম
-            'USER': 'postgres',           # তোমার local user
-            'PASSWORD': 'postgres123',    # তোমার local password
+            'NAME': 'ecommerce',          # local DB 
+            'USER': 'postgres',           # local user
+            'PASSWORD': 'postgres123',    # local password
             'HOST': 'localhost',
             'PORT': '5432',
         }
@@ -188,5 +188,6 @@ CORS_ALLOWED_ORIGINS = [
 STATIC_URL = 'static/'
 
 MEDIA_URL = "/media/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+GOOGLE_CLIENT_ID = "453299031822-tcsu6vhan0t6o9dv66k0etrh860c8cp0.apps.googleusercontent.com"
+# STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")

@@ -38,6 +38,7 @@ urlpatterns = [
         "auth/login/",
         views.LoginView.as_view()
     ),
+    path("auth/google/", views.GoogleLoginView.as_view()),
 
     # Token Refresh
     path(
