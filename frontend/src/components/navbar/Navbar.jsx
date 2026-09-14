@@ -201,6 +201,7 @@
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { FiUser } from "react-icons/fi";
 import {
   MdOutlineShoppingCart,
   MdSearch,
@@ -266,7 +267,7 @@ const Navbar = () => {
   );
 
   return (
-    <div className="navbar sticky top-0 z-50 bg-[#CDE4EA] w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 shadow-sm">
+    <div className="navbar sticky top-0 z-50 bg-white w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 shadow-sm">
 
       {/* Navbar Start */}
       <div className="navbar-start">
@@ -334,7 +335,7 @@ const Navbar = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
-            className="input input-bordered w-40 lg:w-52"
+            className="input input-bordered w-60 lg:w-70"
           />
 
           <button
@@ -346,8 +347,15 @@ const Navbar = () => {
           </button>
         </form>
 
-        {/* Cart */}
-        <Link
+        {/* Cart & Login */}
+       <div className="flex items-center gap-4">
+          <Link
+            to="/login"
+            className="btn btn-ghost btn-circle"
+          >
+            <FiUser className="text-3xl" />
+          </Link>
+         <Link
           to="/cart"
           className="btn btn-ghost btn-circle relative"
         >
@@ -360,6 +368,7 @@ const Navbar = () => {
             </span>
           )}
         </Link>
+       </div>
 
       </div>
     </div>

@@ -284,7 +284,7 @@ const ProductList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-7">
+    <div className="min-h-screen bg-gray-100 py-4">
 
       {/* Search Result Text */}
       {search && (

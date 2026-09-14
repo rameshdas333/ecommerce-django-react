@@ -596,7 +596,7 @@ const ProductDetails = () => {
                   style={{
                     backgroundImage: `url(${imageUrl})`,
                     backgroundRepeat: "no-repeat",
-                    backgroundSize: "350% 350%",
+                    backgroundSize: "250% 250%",
                     backgroundPosition: `${position.x}% ${position.y}%`,
                   }}
                 />
@@ -634,8 +634,8 @@ const ProductDetails = () => {
           </p>
 
           {/* Price */}
-          <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-5">
-            BDT {Number(product.price || 0).toFixed(2)}
+          <p className="text-xl sm:text-3xl font-bold text-[#F85606] cursor-pointer   mt-5">
+            ৳ {Number(product.price || 0).toFixed(2)}
           </p>
 
           {/* Stock */}
@@ -662,10 +662,10 @@ const ProductDetails = () => {
             type="button"
             onClick={handleAddToCart}
             disabled={Number(product.stock) <= 0}
-            className={`mt-8 px-8 py-3 rounded-lg text-white font-medium transition ${
+            className={`mt-8 px-8 py-3 cursor-pointer rounded-lg text-white font-medium transition ${
               Number(product.stock) <= 0
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+                : "bg-[#C74500] hover:bg-[#C74500]"
             }`}
           >
             {Number(product.stock) <= 0
@@ -681,8 +681,9 @@ const ProductDetails = () => {
               mt-4
               flex
               items-center
+              cursor-pointer
               gap-2
-              text-gray-700
+              text-blue-700
               font-medium
               hover:text-blue-600
               transition-colors
