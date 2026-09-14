@@ -9,7 +9,7 @@ const BannerLeft = () => {
         md:w-auto
         py-2
         pt-6
-        sm:pt-10
+        sm:pt-6
         md:pt-[80px]
         relative
         pr-10
@@ -80,7 +80,7 @@ const BannerLeft = () => {
 
       <Link
         to="/category/health-beauty"
-        className="block py-2 text-base"
+        className="block pt-2 text-base"
       >
         Health & Beauty
       </Link>

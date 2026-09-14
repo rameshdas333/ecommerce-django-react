@@ -10,7 +10,7 @@ const Banner = () => {
            <div className='lg:w-[20%]'>
             <BannerLeft/>
            </div>
-           <div className='pt-10 lg:w-[80%]'>
+           <div className='pt-5 lg:w-[80%]'>
             <BannerRight/>
            </div>
         </div>

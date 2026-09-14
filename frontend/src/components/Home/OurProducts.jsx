@@ -292,7 +292,7 @@ const OurProducts = () => {
                 text-sm
                 sm:text-base
                 rounded
-                hover:bg-[#c73535]
+                hover:bg-[#0b21e8]
                 transition
                 duration-300
               "

@@ -74,7 +74,7 @@ const BrowseCategory = () => {
             {/* Title */}
             <h2
               className="
-                text-2xl
+                text-xl
                 sm:text-3xl
                 md:text-[30px]
                 font-semibold
