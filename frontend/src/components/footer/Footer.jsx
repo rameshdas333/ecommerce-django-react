@@ -16,7 +16,7 @@ export default function Footer() {
 
         {/* Exclusive */}
         <div>
-          <h2 className="text-xl font-bold">Exclusive</h2>
+          <h2 className="text-xl font-bold">SmartBazer</h2>
 
           <p className="mt-4 text-sm">
             Get 10% off your first order

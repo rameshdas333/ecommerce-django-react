@@ -50,7 +50,7 @@ const CurrentOffers = () => {
             {/* Progress bar */}
             <div className="w-full h-[8px] sm:h-[9px] bg-[#eef1f0] rounded-[1px] overflow-hidden">
               <div
-                className="h-full bg-[#9ca9a6] rounded-[1px] transition-all duration-500"
+                className="h-full bg-green-500 rounded-[1px] transition-all duration-500"
                 style={{ width: `${offer.progress}%` }}
               />
             </div>

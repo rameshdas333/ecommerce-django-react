@@ -1,10 +1,13 @@
 import React from 'react'
+import AboutUP from './AboutUP'
+// import AboutDown from './AboutDown'
 
 const About = () => {
   return (
     <div>
-      <h1>About Page</h1>
-      <p>Welcome to the About page!</p>
+      <AboutUP />
+      {/* <AboutDown /> */}
+      
     </div>
   )
 }

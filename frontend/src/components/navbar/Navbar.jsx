@@ -121,7 +121,8 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/">
           <img
-            width="80"
+            width="56"
+            lg:width="80"
             className="rounded-lg"
             src={logo}
             alt="Logo"

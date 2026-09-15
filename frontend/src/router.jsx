@@ -16,6 +16,7 @@ import ForgotPassword from "./components/authLayout/ForgotPassword.jsx";
 import ResetPassword from "./components/authLayout/ResetPassword.jsx";
 
 import About from "./components/pages/about/About.jsx";
+import Contact from "./components/pages/contact/Contact.jsx";
 
 // ================= ADMIN =================
 import AdminLayout from "./admin/AdminLayout.jsx";
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
       {
         path: "about",
         element: <About />,
+      },
+      {
+         path: "contact",
+         element: <Contact />,
       },
 
       {
