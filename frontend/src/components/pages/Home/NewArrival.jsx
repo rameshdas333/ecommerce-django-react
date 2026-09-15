@@ -1,13 +1,13 @@
-import Title from '../Title/Title';
+import Title from '../../Title/Title';
 
-import Frame1 from '../../assets/Frame1.png';
-import Frame2 from '../../assets/Frame2.png';
-import Frame3 from '../../assets/Frame3.png';
-import Frame4 from '../../assets/Frame 4.png';
+import Frame1 from '../../../assets/Frame1.png';
+import Frame2 from '../../../assets/Frame2.png';
+import Frame3 from '../../../assets/Frame3.png';
+import Frame4 from '../../../assets/Frame 4.png';
 
-import Service1 from '../../assets/Services.png';
-import Service2 from '../../assets/Services (1).png';
-import Service3 from '../../assets/Services (2).png';
+import Service1 from '../../../assets/Services.png';
+import Service2 from '../../../assets/Services (1).png';
+import Service3 from '../../../assets/Services (2).png';
 
 const NewArrival = () => {
     const services = [

@@ -1,9 +1,9 @@
-import Title from "../Title/Title.jsx";
+import Title from "../../Title/Title.jsx";
 
-import bag from "../../assets/bag.png";
-import music from "../../assets/music.png";
-import bookself from "../../assets/bookself.png";
-import shart from "../../assets/Shirt.png";
+import bag from "../../../assets/bag.png";
+import music from "../../../assets/music.png";
+import bookself from "../../../assets/bookself.png";
+import shart from "../../../assets/Shirt.png";
 
 import { GoHeart } from "react-icons/go";
 import { IoEyeOutline } from "react-icons/io5";
@@ -18,10 +18,10 @@ const BestSellingProduct = () => {
           pt-4
           sm:pt-4
           md:pt-6
-          pb-12
-          sm:pb-16
-          md:pb-20
-          lg:pb-[122px]
+          pb-6
+          sm:pb-6
+          md:pb-10
+          lg:pb-16
 
           after:absolute
           after:content-['']

@@ -107,6 +107,22 @@ if (totalQuantity === 1) {
     }
   };
 
+ 
+
+ // ===================user login / register security=========================
+  // ================= PLACE ORDER =================
+const handlePlaceOrder = () => {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    toast.info("Please login or register before placing your order.");
+    navigate("/login");
+    return;
+  }
+
+  navigate("/checkout");
+};
+
   // ================= DECREMENT =================
   const handleDecreaseQuantity = (item) => {
 
@@ -392,7 +408,7 @@ if (totalQuantity === 1) {
             {/* CHECKOUT */}
             <button
               type="button"
-              onClick={() => navigate("/checkout")}
+              onClick={handlePlaceOrder}
               className="w-full mt-6 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg transition"
             >
               Proceed to Checkout

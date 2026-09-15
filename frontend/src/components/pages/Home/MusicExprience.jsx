@@ -1,10 +1,10 @@
 
 import moment from 'moment';
-import enhance from '../../assets/enhance.jpg';
+import enhance from '../../../assets/enhance.jpg';
 
 const MusicExperience = () => {
     return (
-        <div className="mb-10 sm:mb-12 md:mb-14 lg:mb-16">
+        <div className="mb-6 sm:mb-6 md:mb-8 lg:mb-12">
 
             <div
                 className="

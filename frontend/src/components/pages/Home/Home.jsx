@@ -1,6 +1,6 @@
 import React from 'react'
 import {useState, useEffect} from 'react'
-import BestSellingProduct from '../Home/BestSellingProduct.jsx';
+import BestSellingProduct from './BestSellingProduct.jsx';
 import MusicExperience from './MusicExprience.jsx';
 import NewArrival from './NewArrival.jsx';
 import OurProducts from './OurProducts.jsx';

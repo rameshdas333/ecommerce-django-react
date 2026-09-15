@@ -1,6 +1,6 @@
 import React from 'react';
-import BannerLeft from '../Home/BannerLeft.jsx';
-import BannerRight from '../Home/BannerRight.jsx';
+import BannerLeft from './BannerLeft.jsx';
+import BannerRight from './BannerRight.jsx';
 
 const Banner = () => {
     return (

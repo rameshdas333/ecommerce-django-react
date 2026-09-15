@@ -1,21 +1,21 @@
 
 import { GoHeart } from "react-icons/go";
-import Title from "../Title/Title";
+import Title from "../../Title/Title";
 import { IoEyeOutline } from "react-icons/io5";
 import { TiStarFullOutline } from "react-icons/ti";
-import cat from "../../assets/cat.png";
-import camera from "../../assets/camera.png";
-import laptop from "../../assets/laptop.png";
-import facewash from "../../assets/facewash.png";
-import fan from "../../assets/fann.jpg";
-import shirt from "../../assets/Shirt.png";
+import cat from "../../../assets/cat.png";
+import camera from "../../../assets/camera.png";
+import laptop from "../../../assets/laptop.png";
+import facewash from "../../../assets/facewash.png";
+import fan from "../../../assets/fann.jpg";
+import shirt from "../../../assets/Shirt.png";
 import { useState } from "react";
 
 const OurProducts = () => {
-  const [visible, setVisible] = useState(4);
+  const [visible, setVisible] = useState(5);
 
   const handleLoadData = () => {
-    setVisible((prev) => prev + 4);
+    setVisible((prev) => prev + 5);
   };
 
   const products = [
@@ -79,6 +79,18 @@ const OurProducts = () => {
       image: facewash,
       rating: 4,
     },
+      {
+      name: " Fan High Speed",
+      price: "BDT 900",
+      image: fan,
+      rating: 5,
+    },
+     {
+      name: "Shart",
+      price: "BDT 700",
+      image: shirt,
+      rating: 4,
+    },
   ];
 
   return (
@@ -101,7 +113,7 @@ const OurProducts = () => {
             grid-cols-2
             sm:grid-cols-2
             md:grid-cols-3
-            lg:grid-cols-4
+            lg:grid-cols-5
             gap-x-3
             gap-y-7
             sm:gap-x-5

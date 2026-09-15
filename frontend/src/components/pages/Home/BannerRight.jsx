@@ -5,9 +5,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import banner from "../../assets/banner.png";
-import banner2 from "../../assets/banner2.png";
-import banner3 from "../../assets/banner3.png";
+import banner from "../../../assets/banner.png";
+import banner2 from "../../../assets/banner2.png";
+import banner3 from "../../../assets/banner3.png";
 
 import { Autoplay, Pagination } from "swiper/modules";
 
