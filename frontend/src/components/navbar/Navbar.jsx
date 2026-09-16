@@ -121,11 +121,9 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/">
           <img
-            width="56"
-            lg:width="80"
-            className="rounded-lg"
             src={logo}
             alt="Logo"
+            className="w-14 sm:w-16 md:w-18 lg:w-20 h-auto rounded-lg object-contain"
           />
         </Link>
       </div>
