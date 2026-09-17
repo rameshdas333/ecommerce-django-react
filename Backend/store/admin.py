@@ -1,46 +1,3 @@
-# from django.contrib import admin
-
-# from .models import (
-#     Category,
-#     Color,
-#     Product,
-#     Size,
-#     UserProfile,
-#     Order,
-#     OrderItem,
-# )
-
-
-# # ================= SIZE INLINE =================
-# class SizeInline(admin.TabularInline):
-#     model = Size
-#     extra = 1
-
-
-# # ================= COLOR INLINE =================
-# class ColorInline(admin.TabularInline):
-#     model = Color
-#     extra = 1
-
-
-# # ================= PRODUCT ADMIN =================
-# @admin.register(Product)
-# class ProductAdmin(admin.ModelAdmin):
-#     inlines = [
-#         SizeInline,
-#         ColorInline,
-#     ]
-
-
-# # ================= OTHER MODELS =================
-# admin.site.register([
-#     Category,
-#     UserProfile,
-#     Order,
-#     OrderItem,
-# ])
-
-
 from django.contrib import admin
 from .models import (
     Product,
@@ -81,14 +38,13 @@ class ProductAdmin(admin.ModelAdmin):
 # =========================
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-
     extra = 0
 
     readonly_fields = (
         "product",
         "quantity",
         "price",
-         "total_price",
+        "total_price",
     )
 
     fields = (
@@ -112,6 +68,7 @@ class OrderAdmin(admin.ModelAdmin):
         "first_name",
         "email",
         "phone_number",
+        "products",
         "total_amount",
         "payment_method",
         "created_at",
@@ -135,6 +92,14 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline,
     ]
+
+    def products(self, obj):
+        return ", ".join(
+            item.product.name
+            for item in obj.items.select_related("product").all()
+        )
+
+    products.short_description = "Products"
 
 
 # =========================
