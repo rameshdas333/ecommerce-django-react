@@ -1,6 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import logo from "../assets/logo.png";
+import SalesAnalytic from "../admin/Pages/Analytics.jsx";
+import AdminInventory from "../admin/Pages/AdminInventory.jsx";
+import Orders from "../admin/Pages/Orders.jsx";
 import {
   FiHome,
   FiBarChart2,
@@ -14,6 +17,7 @@ import {
   FiX,
 } from "react-icons/fi";
 
+
 const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const menuItems = [
     {
@@ -24,6 +28,7 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
     {
       name: "Analytics",
       path: "/admin/analytics",
+      element: <SalesAnalytic />,
       icon: FiBarChart2,
     },
     {
@@ -34,11 +39,13 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
     {
       name: "Inventory",
       path: "/admin/inventory",
+      element: <AdminInventory />,
       icon: FiArchive,
     },
     {
       name: "Orders",
       path: "/admin/orders",
+      element: <Orders/>,
       icon: FiShoppingBag,
     },
     {

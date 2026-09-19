@@ -39,7 +39,7 @@ const Checkout = () => {
   // ================= BILLING DATA =================
   const [billingData, setBillingData] = useState({
     first_name: "",
-    company_name: "",
+    last_name: "",
     street_address: "",
     apartment: "",
     town_city: "",
@@ -265,8 +265,8 @@ const Checkout = () => {
 
             <input
               type="text"
-              name="company_name"
-              value={billingData.company_name}
+              name="last_name"
+              value={billingData.last_name}
               onChange={handleChange}
               className="w-full border p-3 rounded"
             />

@@ -23,7 +23,7 @@ import AdminLayout from "./admin/AdminLayout.jsx";
 import AdminDashboard from "./admin/Pages/AdminDashboard.jsx";
 import AdminProducts from "./admin/Pages/AdminProducts.jsx";
 import Analytics from "./admin/Pages/Analytics.jsx";
-import Inventory from "./admin/Pages/Inventory.jsx";
+import Inventory from "./admin/Pages/AdminInventory.jsx";
 import Orders from "./admin/Pages/Orders.jsx";
 import Sales from "./admin/Pages/Sales.jsx";
 import Customers from "./admin/Pages/Customers.jsx";

@@ -88,7 +88,7 @@ class Order(models.Model):
 
     first_name = models.CharField(max_length=100)
 
-    company_name = models.CharField(
+    last_name = models.CharField(
         max_length=200,
         blank=True,
         null=True

@@ -32,25 +32,45 @@ from google.auth.transport import requests as google_requests
 #     serializer = ProductSerializer(products, many=True)
 #     return Response(serializer.data)
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def get_product(request):
-    products = Product.objects.all()
 
-    search = request.GET.get("search")
+    # GET - All Products
+    if request.method == "GET":
+        products = Product.objects.all()
 
-    if search:
-        products = products.filter(
-            name__icontains=search
-        ) | products.filter(
-            description__icontains=search
+        search = request.GET.get("search")
+
+        if search:
+            products = products.filter(
+                name__icontains=search
+            ) | products.filter(
+                description__icontains=search
+            )
+
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+    # POST - Add / Duplicate Product
+    if request.method == "POST":
+        serializer = ProductSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
         )
-
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
 
 
 # Single Product Details
-@api_view(["GET"])
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
 def get_product_details(request, id):
     try:
         product = Product.objects.get(id=id)
@@ -60,8 +80,36 @@ def get_product_details(request, id):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    serializer = ProductSerializer(product)
-    return Response(serializer.data)
+    # GET
+    if request.method == "GET":
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+
+    # DELETE
+    if request.method == "DELETE":
+        product.delete()
+
+        return Response(
+            {"message": "Product deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    # PUT / PATCH
+    serializer = ProductSerializer(
+        product,
+        data=request.data,
+        partial=request.method == "PATCH"
+    )
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
 
 
 # All Categories
