@@ -1,4 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import axios from "axios";
 import {
   FiCalendar,
@@ -12,7 +17,8 @@ import {
 import { toast } from "react-toastify";
 
 const BASEURL =
-  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000";
+  import.meta.env.VITE_DJANGO_BASE_URL ||
+  "http://127.0.0.1:8000";
 
 /* =========================
    AUTH HEADERS
@@ -155,8 +161,16 @@ const Sales = () => {
         localStorage.getItem("access_token");
 
       console.log("Sales API calling...");
-      console.log("Sales API URL:", `${BASEURL}/api/orders/`);
-      console.log("Token exists:", !!token);
+
+      console.log(
+        "Sales API URL:",
+        `${BASEURL}/api/orders/`
+      );
+
+      console.log(
+        "Token exists:",
+        !!token
+      );
 
       const response = await axios.get(
         `${BASEURL}/api/orders/`,
@@ -165,7 +179,10 @@ const Sales = () => {
         }
       );
 
-      console.log("Sales API response:", response.data);
+      console.log(
+        "Sales API response:",
+        response.data
+      );
 
       const data = response.data;
 
@@ -177,31 +194,105 @@ const Sales = () => {
 
       if (Array.isArray(data)) {
         orderList = data;
-      } else if (Array.isArray(data?.results)) {
+      } else if (
+        Array.isArray(data?.results)
+      ) {
         orderList = data.results;
-      } else if (Array.isArray(data?.orders)) {
+      } else if (
+        Array.isArray(data?.orders)
+      ) {
         orderList = data.orders;
-      } else if (Array.isArray(data?.data)) {
+      } else if (
+        Array.isArray(data?.data)
+      ) {
         orderList = data.data;
       }
 
-      console.log("Sales orders received:", orderList.length);
+      console.log(
+        "Sales orders received:",
+        orderList.length
+      );
 
       setOrders(orderList);
     } catch (error) {
-      console.error("Sales fetch error:", error);
+      console.error(
+        "Sales fetch error:",
+        error
+      );
 
       console.error(
         "Sales error response:",
         error?.response?.data
       );
 
+      /* =========================
+         LOGIN ERROR TOAST
+      ========================= */
+
       if (error.response?.status === 401) {
-        toast.error("Please login again.");
-      } else if (error.response?.status === 403) {
-        toast.error("You don't have permission to view sales.");
+        toast.error(
+          "Please login again.",
+          {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            toastId:
+              "sales-login-error",
+
+            style: {
+              fontSize: "16px",
+              fontWeight: "600",
+              padding: "16px 20px",
+              minWidth: "320px",
+              borderRadius: "10px",
+            },
+          }
+        );
+      } else if (
+        error.response?.status === 403
+      ) {
+        toast.error(
+          "You don't have permission to view sales.",
+          {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+
+            style: {
+              fontSize: "16px",
+              fontWeight: "600",
+              padding: "16px 20px",
+              minWidth: "320px",
+              borderRadius: "10px",
+            },
+          }
+        );
       } else {
-        toast.error("Failed to load sales data.");
+        toast.error(
+          "Failed to load sales data.",
+          {
+            position: "top-right",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+
+            style: {
+              fontSize: "16px",
+              fontWeight: "600",
+              padding: "16px 20px",
+              minWidth: "320px",
+              borderRadius: "10px",
+            },
+          }
+        );
       }
     } finally {
       setLoading(false);
@@ -238,7 +329,10 @@ const Sales = () => {
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
         fetchOrders();
       }
     };
@@ -263,7 +357,8 @@ const Sales = () => {
   const deliveredOrders = useMemo(() => {
     return orders.filter(
       (order) =>
-        getOrderStatus(order) === "delivered"
+        getOrderStatus(order) ===
+        "delivered"
     );
   }, [orders]);
 
@@ -274,69 +369,87 @@ const Sales = () => {
   const filteredSales = useMemo(() => {
     const now = new Date();
 
-    return deliveredOrders.filter((order) => {
-      const orderDateValue = getOrderDate(order);
+    return deliveredOrders.filter(
+      (order) => {
+        const orderDateValue =
+          getOrderDate(order);
 
-      if (!orderDateValue) {
-        return false;
-      }
+        if (!orderDateValue) {
+          return false;
+        }
 
-      const orderDate = new Date(orderDateValue);
+        const orderDate =
+          new Date(orderDateValue);
 
-      if (Number.isNaN(orderDate.getTime())) {
-        return false;
-      }
+        if (
+          Number.isNaN(
+            orderDate.getTime()
+          )
+        ) {
+          return false;
+        }
 
-      /* ALL */
+        /* ALL */
 
-      if (dateFilter === "All") {
+        if (dateFilter === "All") {
+          return true;
+        }
+
+        /* TODAY */
+
+        if (dateFilter === "Today") {
+          return (
+            orderDate.toDateString() ===
+            now.toDateString()
+          );
+        }
+
+        /* LAST 7 DAYS */
+
+        if (dateFilter === "7 Days") {
+          const sevenDaysAgo =
+            new Date();
+
+          sevenDaysAgo.setDate(
+            now.getDate() - 7
+          );
+
+          return (
+            orderDate >=
+            sevenDaysAgo
+          );
+        }
+
+        /* LAST 30 DAYS */
+
+        if (dateFilter === "30 Days") {
+          const thirtyDaysAgo =
+            new Date();
+
+          thirtyDaysAgo.setDate(
+            now.getDate() - 30
+          );
+
+          return (
+            orderDate >=
+            thirtyDaysAgo
+          );
+        }
+
+        /* THIS YEAR */
+
+        if (
+          dateFilter === "This Year"
+        ) {
+          return (
+            orderDate.getFullYear() ===
+            now.getFullYear()
+          );
+        }
+
         return true;
       }
-
-      /* TODAY */
-
-      if (dateFilter === "Today") {
-        return (
-          orderDate.toDateString() ===
-          now.toDateString()
-        );
-      }
-
-      /* LAST 7 DAYS */
-
-      if (dateFilter === "7 Days") {
-        const sevenDaysAgo = new Date();
-
-        sevenDaysAgo.setDate(
-          now.getDate() - 7
-        );
-
-        return orderDate >= sevenDaysAgo;
-      }
-
-      /* LAST 30 DAYS */
-
-      if (dateFilter === "30 Days") {
-        const thirtyDaysAgo = new Date();
-
-        thirtyDaysAgo.setDate(
-          now.getDate() - 30
-        );
-
-        return orderDate >= thirtyDaysAgo;
-      }
-
-      /* THIS YEAR */
-
-      if (dateFilter === "This Year") {
-        return (
-          orderDate.getFullYear() ===
-          now.getFullYear()
-        );
-      }
-
-      return true;
-    });
+    );
   }, [deliveredOrders, dateFilter]);
 
   /* =========================
@@ -348,9 +461,11 @@ const Sales = () => {
     let productsSold = 0;
 
     filteredSales.forEach((order) => {
-      totalSales += getOrderTotal(order);
+      totalSales +=
+        getOrderTotal(order);
 
-      const items = getOrderItems(order);
+      const items =
+        getOrderItems(order);
 
       if (Array.isArray(items)) {
         items.forEach((item) => {
@@ -362,11 +477,16 @@ const Sales = () => {
 
     return {
       totalSales,
-      totalOrders: filteredSales.length,
+
+      totalOrders:
+        filteredSales.length,
+
       productsSold,
+
       averageOrder:
         filteredSales.length > 0
-          ? totalSales / filteredSales.length
+          ? totalSales /
+            filteredSales.length
           : 0,
     };
   }, [filteredSales]);
@@ -439,7 +559,9 @@ const Sales = () => {
             0
         );
 
-        if (!productMap[productName]) {
+        if (
+          !productMap[productName]
+        ) {
           productMap[productName] = {
             name: productName,
             quantity: 0,
@@ -447,10 +569,13 @@ const Sales = () => {
           };
         }
 
-        productMap[productName].quantity +=
-          quantity;
+        productMap[
+          productName
+        ].quantity += quantity;
 
-        productMap[productName].revenue +=
+        productMap[
+          productName
+        ].revenue +=
           price * quantity;
       });
     });
@@ -458,7 +583,8 @@ const Sales = () => {
     return Object.values(productMap)
       .sort(
         (a, b) =>
-          b.quantity - a.quantity
+          b.quantity -
+          a.quantity
       )
       .slice(0, 5);
   }, [filteredSales]);
@@ -478,9 +604,14 @@ const Sales = () => {
         return;
       }
 
-      const date = new Date(dateValue);
+      const date =
+        new Date(dateValue);
 
-      if (Number.isNaN(date.getTime())) {
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
         return;
       }
 
@@ -497,14 +628,19 @@ const Sales = () => {
     });
 
     return Object.entries(salesMap)
-      .sort(([dateA], [dateB]) =>
-        dateA.localeCompare(dateB)
+      .sort(
+        ([dateA], [dateB]) =>
+          dateA.localeCompare(
+            dateB
+          )
       )
       .slice(-7)
-      .map(([date, amount]) => ({
-        date,
-        amount,
-      }));
+      .map(
+        ([date, amount]) => ({
+          date,
+          amount,
+        })
+      );
   }, [filteredSales]);
 
   /* =========================
@@ -526,7 +662,8 @@ const Sales = () => {
           </h1>
 
           <p className="mt-1 text-sm text-gray-500">
-            Track your sales, revenue and top-selling products
+            Track your sales, revenue and
+            top-selling products
           </p>
         </div>
 
@@ -536,7 +673,9 @@ const Sales = () => {
 
           <div className="relative w-full sm:w-44">
 
-            <FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <FiCalendar
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
 
             <select
               value={dateFilter}
@@ -568,7 +707,9 @@ const Sales = () => {
               </option>
             </select>
 
-            <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <FiChevronDown
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
 
           </div>
 
@@ -603,8 +744,6 @@ const Sales = () => {
 
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
-        {/* TOTAL SALES */}
-
         <SalesStat
           title="Total Sales"
           value={formatCurrency(
@@ -614,8 +753,6 @@ const Sales = () => {
           takaIcon={true}
         />
 
-        {/* TOTAL ORDERS */}
-
         <SalesStat
           title="Total Orders"
           value={salesStats.totalOrders}
@@ -623,16 +760,12 @@ const Sales = () => {
           iconClass="bg-blue-100 text-blue-600"
         />
 
-        {/* PRODUCTS SOLD */}
-
         <SalesStat
           title="Products Sold"
           value={salesStats.productsSold}
           icon={FiPackage}
           iconClass="bg-purple-100 text-purple-600"
         />
-
-        {/* TODAY SALES */}
 
         <SalesStat
           title="Today's Sales"
@@ -750,7 +883,8 @@ const Sales = () => {
                                 {
                                   month:
                                     "short",
-                                  day: "numeric",
+                                  day:
+                                    "numeric",
                                 }
                               )}
                             </div>
@@ -911,7 +1045,9 @@ const Sales = () => {
 
                 <SummaryRow
                   label="Orders"
-                  value={salesStats.totalOrders}
+                  value={
+                    salesStats.totalOrders
+                  }
                 />
 
                 <SummaryRow
@@ -1172,7 +1308,8 @@ const Sales = () => {
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-500">
-                    No delivered orders are available for this period.
+                    No delivered orders are
+                    available for this period.
                   </p>
 
                 </div>

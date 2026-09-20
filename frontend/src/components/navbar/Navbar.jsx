@@ -1,7 +1,5 @@
 
-
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/slices/authSlice.js";
@@ -10,21 +8,55 @@ import {
   MdOutlineShoppingCart,
   MdSearch,
 } from "react-icons/md";
+import axios from "axios";
 
-import logo from "../../assets/logo.png";
+const API_URL =
+  import.meta.env.VITE_DJANGO_BASE_URL ||
+  "http://127.0.0.1:8000";
 
 const Navbar = () => {
-
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const isAuthenticated = useSelector(
     (state) => state.auth.isAuthenticated
   );
 
+  // Website logo from backend
+  const [logo, setLogo] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/settings/`
+        );
+
+        const logoPath = response.data?.user_logo;
+
+        if (logoPath) {
+          if (logoPath.startsWith("http")) {
+            setLogo(logoPath);
+          } else {
+            setLogo(`${API_URL}${logoPath}`);
+          }
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load website logo:",
+          error
+        );
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
   };
+
   // Redux from Cart Items
   const cartItems = useSelector(
     (state) => state.cart.cartItems
@@ -38,9 +70,6 @@ const Navbar = () => {
 
   // Search state
   const [search, setSearch] = useState("");
-
-  // Navigate
-  const navigate = useNavigate();
 
   // Search function
   const handleSearch = (e) => {
@@ -121,7 +150,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/">
           <img
-            src={logo}
+            src={logo || "/logo.png"}
             alt="Logo"
             className="w-14 sm:w-16 md:w-18 lg:w-20 h-auto rounded-lg object-contain"
           />
@@ -163,6 +192,7 @@ const Navbar = () => {
 
         {/* Cart & Login */}
         <div className="flex items-center gap-4">
+
           {isAuthenticated ? (
             <div className="dropdown dropdown-end">
               <button
@@ -203,6 +233,7 @@ const Navbar = () => {
               <FiUser className="text-3xl" />
             </Link>
           )}
+
           <Link
             to="/cart"
             className="btn btn-ghost btn-circle relative"
@@ -216,8 +247,8 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-        </div>
 
+        </div>
       </div>
     </div>
   );

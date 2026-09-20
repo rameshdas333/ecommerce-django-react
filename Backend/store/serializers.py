@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Cart, CartItem, Product, Category, Order, OrderItem,Size
+from .models import Cart, CartItem, Product, Category, Order, OrderItem,Size,SiteSettings
 from django.contrib.auth.models import User
+
 
 
 
@@ -216,5 +217,112 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
+class CustomerSerializer(serializers.ModelSerializer):
+    phone_number = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    total_orders = serializers.SerializerMethodField()
+    total_spent = serializers.SerializerMethodField()
+    last_order_date = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "address",
+            "total_orders",
+            "total_spent",
+            "last_order_date",
+            "status",
+            "date_joined",
+        ]
+
+    def get_phone_number(self, obj):
+        # First try UserProfile
+        try:
+            if hasattr(obj, "userprofile") and obj.userprofile.phone_number:
+                return obj.userprofile.phone_number
+        except Exception:
+            pass
+
+        # If profile phone is empty, get latest order phone
+        order = obj.orders.order_by("-created_at").first()
+
+        if order:
+            return order.phone_number
+
+        return ""
+
+    def get_address(self, obj):
+        # UserProfile address
+        try:
+            if hasattr(obj, "userprofile") and obj.userprofile.address:
+                return obj.userprofile.address
+        except Exception:
+            pass
+
+        # Latest order address
+        order = obj.orders.order_by("-created_at").first()
+
+        if order:
+            address_parts = [
+                order.street_address,
+                order.apartment,
+                order.town_city,
+            ]
+
+            return ", ".join(
+                part for part in address_parts if part
+            )
+
+        return ""
+
+    def get_total_orders(self, obj):
+        return obj.orders.count()
+
+    def get_total_spent(self, obj):
+        from django.db.models import Sum
+
+        total = obj.orders.aggregate(
+            total=Sum("total_amount")
+        )["total"]
+
+        return total or 0
+
+    def get_last_order_date(self, obj):
+        order = obj.orders.order_by("-created_at").first()
+
+        if order:
+            return order.created_at
+
+        return None
+
+    def get_status(self, obj):
+        if obj.is_active:
+            return "Active"
+
+        return "Inactive"
+
+class SiteSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteSettings
+        fields = [
+             "id",
+             "user_logo",
+             "admin_logo",
+             "sidebar_logo",
+             "banner_1",
+             "banner_2",
+             "banner_3",
+             "updated_at",
+             ]
+
+        read_only_fields = [
+            "id",
+            "updated_at",
+        ]
          

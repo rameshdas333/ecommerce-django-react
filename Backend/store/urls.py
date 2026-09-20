@@ -58,6 +58,20 @@ urlpatterns = [
       
     ),
 
+    path(
+    "customers/",
+    views.CustomerListView.as_view()
+),
+path(
+    "settings/",
+    views.SiteSettingsView.as_view()
+),
+
+path(
+    "dashboard/",
+    views.AdminDashboardView.as_view()
+),
+
 
     # Orders
     path("", include(router.urls)),

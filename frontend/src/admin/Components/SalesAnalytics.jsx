@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import {
   AreaChart,
   Area,
@@ -9,90 +10,6 @@ import {
   Tooltip,
 } from "recharts";
 
-const salesData = {
-  "7 Days": [
-    { date: "Sep 10", value: 12 },
-    { date: "Sep 11", value: 24 },
-    { date: "Sep 12", value: 18 },
-    { date: "Sep 13", value: 35 },
-    { date: "Sep 14", value: 20 },
-    { date: "Sep 15", value: 42 },
-    { date: "Sep 16", value: 28 },
-  ],
-
-  "1 Month": [
-    { date: "Week 1", value: 18 },
-    { date: "Week 2", value: 32 },
-    { date: "Week 3", value: 22 },
-    { date: "Week 4", value: 45 },
-  ],
-
-  "6 Months": [
-    { date: "Apr", value: 20 },
-    { date: "May", value: 35 },
-    { date: "Jun", value: 25 },
-    { date: "Jul", value: 48 },
-    { date: "Aug", value: 30 },
-    { date: "Sep", value: 45 },
-  ],
-
-  "12 Months": [
-    { date: "Oct", value: 18 },
-    { date: "Nov", value: 25 },
-    { date: "Dec", value: 20 },
-    { date: "Jan", value: 32 },
-    { date: "Feb", value: 28 },
-    { date: "Mar", value: 38 },
-    { date: "Apr", value: 24 },
-    { date: "May", value: 35 },
-    { date: "Jun", value: 27 },
-    { date: "Jul", value: 48 },
-    { date: "Aug", value: 34 },
-    { date: "Sep", value: 45 },
-  ],
-
-  All: [
-    { date: "2021", value: 20 },
-    { date: "2022", value: 32 },
-    { date: "2023", value: 25 },
-    { date: "2024", value: 42 },
-    { date: "2025", value: 35 },
-    { date: "2026", value: 48 },
-  ],
-};
-
-const statsData = {
-  "7 Days": {
-    income: "8,262.00",
-    expenses: "3,135.00",
-    balance: "12,135.00",
-  },
-
-  "1 Month": {
-    income: "23,262.00",
-    expenses: "11,135.00",
-    balance: "48,135.00",
-  },
-
-  "6 Months": {
-    income: "86,450.00",
-    expenses: "42,350.00",
-    balance: "125,780.00",
-  },
-
-  "12 Months": {
-    income: "168,920.00",
-    expenses: "82,430.00",
-    balance: "245,650.00",
-  },
-
-  All: {
-    income: "425,620.00",
-    expenses: "186,430.00",
-    balance: "580,850.00",
-  },
-};
-
 const filterOptions = [
   "7 Days",
   "1 Month",
@@ -101,14 +18,105 @@ const filterOptions = [
   "All",
 ];
 
+const periodMap = {
+  "7 Days": "7_days",
+  "1 Month": "1_month",
+  "6 Months": "6_months",
+  "12 Months": "12_months",
+  All: "all",
+};
+
 export default function SalesAnalytic() {
   const [filter, setFilter] = useState("1 Month");
 
-  const chartData = useMemo(() => {
-    return salesData[filter];
+  const [dashboardData, setDashboardData] = useState({
+    sales_analytics: [],
+    sales_summary: {
+      income: 0,
+      expenses: 0,
+      balance: 0,
+    },
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  // ================= FETCH SALES DATA =================
+  useEffect(() => {
+    const fetchSalesAnalytics = async () => {
+      try {
+        setLoading(true);
+
+        const token = localStorage.getItem("accessToken");
+
+        if (!token) {
+          console.error("Access token not found.");
+          return;
+        }
+
+        const response = await axios.get(
+          `${import.meta.env.VITE_DJANGO_BASE_URL}/api/dashboard/`,
+          {
+            params: {
+              period: periodMap[filter],
+            },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Dashboard API Response:", response.data);
+
+        setDashboardData({
+          sales_analytics: response.data?.sales_analytics || [],
+          sales_summary: response.data?.sales_summary || {
+            income: 0,
+            expenses: 0,
+            balance: 0,
+          },
+        });
+      } catch (error) {
+        console.error(
+          "Sales Analytics API Error:",
+          error.response?.data || error.message
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSalesAnalytics();
   }, [filter]);
 
-  const stats = statsData[filter];
+  // ================= CHART DATA =================
+  const chartData = useMemo(() => {
+    return dashboardData.sales_analytics.map((item) => ({
+      date: item.date,
+      value: Number(item.value || 0),
+    }));
+  }, [dashboardData]);
+
+  // ================= STATS =================
+  const stats = useMemo(() => {
+    const summary = dashboardData.sales_summary || {};
+
+    return {
+      income: Number(summary.income || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+
+      expenses: Number(summary.expenses || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+
+      balance: Number(summary.balance || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    };
+  }, [dashboardData]);
 
   return (
     <section className="w-full bg-white px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">

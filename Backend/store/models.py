@@ -225,4 +225,41 @@ class CartItem(models.Model):
     def subtotal(self):
         return self.product.price * self.quantity
     
-    
+class SiteSettings(models.Model):
+    user_logo = models.ImageField(
+        upload_to="site_settings/",
+        blank=True,
+        null=True
+    )
+
+    admin_logo = models.ImageField(
+        upload_to="site_settings/",
+        blank=True,
+        null=True
+    )
+
+    sidebar_logo = models.ImageField(
+        upload_to="site_settings/",
+        blank=True,
+        null=True
+    )
+
+    banner_1 = models.ImageField(
+    upload_to="site_settings/",
+    blank=True,
+    null=True
+     )
+
+    banner_2 = models.ImageField(
+    upload_to="site_settings/",
+    blank=True,
+    null=True
+     )
+
+    banner_3 = models.ImageField(
+    upload_to="site_settings/",
+    blank=True,
+    null=True
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)

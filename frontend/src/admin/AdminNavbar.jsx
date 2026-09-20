@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   FiSearch,
   FiCalendar,
@@ -8,7 +9,41 @@ import {
   FiMenu,
 } from "react-icons/fi";
 
+const API_URL =
+  import.meta.env.VITE_DJANGO_BASE_URL ||
+  "http://127.0.0.1:8000";
+
 const AdminNavbar = ({ setSidebarOpen }) => {
+  const [adminLogo, setAdminLogo] = useState(null);
+
+  // ================= LOAD ADMIN LOGO =================
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/settings/`
+        );
+
+        const logoPath = response.data?.admin_logo;
+
+        if (logoPath) {
+          setAdminLogo(
+            logoPath.startsWith("http")
+              ? logoPath
+              : `${API_URL}${logoPath}`
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load admin logo:",
+          error.response?.data || error
+        );
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   return (
     <header
       className="
@@ -203,22 +238,36 @@ const AdminNavbar = ({ setSidebarOpen }) => {
               sm:ml-2
             "
           >
-            <div
-              className="
-                w-9
-                h-9
-                rounded-full
-                bg-[#dcefeb]
-                flex
-                items-center
-                justify-center
-                text-[#31b89b]
-                font-semibold
-                shrink-0
-              "
-            >
-              A
-            </div>
+            {adminLogo ? (
+              <img
+                src={adminLogo}
+                alt="Admin Logo"
+                className="
+                  w-9
+                  h-9
+                  rounded-full
+                  object-cover
+                  shrink-0
+                "
+              />
+            ) : (
+              <div
+                className="
+                  w-9
+                  h-9
+                  rounded-full
+                  bg-[#dcefeb]
+                  flex
+                  items-center
+                  justify-center
+                  text-[#31b89b]
+                  font-semibold
+                  shrink-0
+                "
+              >
+                A
+              </div>
+            )}
 
             {/* Profile text only desktop */}
             <div className="hidden lg:block text-left">

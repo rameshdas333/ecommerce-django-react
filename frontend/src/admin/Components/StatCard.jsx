@@ -1,40 +1,43 @@
 import React from "react";
+
 import {
-  FiDollarSign,
   FiShoppingBag,
   FiUsers,
   FiTruck,
   FiArrowUpRight,
 } from "react-icons/fi";
 
-const stats = [
-  {
-    title: "Total Revenue",
-    value: "৳82,650",
-    change: "11%",
-    icon: FiDollarSign,
-  },
-  {
-    title: "Total Order",
-    value: "1,645",
-    change: "11%",
-    icon: FiShoppingBag,
-  },
-  {
-    title: "Total Customer",
-    value: "1,462",
-    change: "17%",
-    icon: FiUsers,
-  },
-  {
-    title: "Pending Delivery",
-    value: "117",
-    change: "11%",
-    icon: FiTruck,
-  },
-];
+const StatCard = ({ data, orderStatus }) => {
+  const stats = [
+    {
+      title: "Total Revenue",
+      value: `৳${Number(data?.total_sales || 0).toLocaleString()}`,
+      change: "11%",
+      icon: "৳",
+    },
 
-const StatCard = () => {
+    {
+      title: "Total Order",
+      value: Number(data?.total_orders || 0).toLocaleString(),
+      change: "11%",
+      icon: FiShoppingBag,
+    },
+
+    {
+      title: "Total Customer",
+      value: Number(data?.total_customers || 0).toLocaleString(),
+      change: "17%",
+      icon: FiUsers,
+    },
+
+    {
+      title: "Pending Delivery",
+      value: Number(orderStatus?.pending || 0).toLocaleString(),
+      change: "11%",
+      icon: FiTruck,
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       {stats.map((item) => {
@@ -57,7 +60,11 @@ const StatCard = () => {
               </div>
 
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#edf9f6] flex items-center justify-center text-[#5fd6bd]">
-                <Icon size={17} />
+                {typeof Icon === "string" ? (
+                  <span className="text-[18px] font-bold">{Icon}</span>
+                ) : (
+                  <Icon size={17} />
+                )}
               </div>
             </div>
 
