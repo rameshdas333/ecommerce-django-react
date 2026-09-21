@@ -104,102 +104,96 @@ const Checkout = () => {
 
   
   // ================= PLACE ORDER =================
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
+// ================= PLACE ORDER =================
+const handlePlaceOrder = async (e) => {
+  e.preventDefault();
 
-    // Empty cart check
-    if (cartItems.length === 0) {
-      alert("Your cart is empty!");
+  try {
+    setLoading(true);
+
+    const token = localStorage.getItem("accessToken");
+
+    // Check login
+    if (!token) {
+      toast.error("Please login first.");
+      navigate("/login");
       return;
     }
 
-    try {
-      setLoading(true);
+    // Prepare order items
+    const orderItems = cartItems.map((item) => ({
+      product: item.id,
+      quantity: Number(item.quantity),
+      price: Number(item.price),
+      size: item.selectedSize || null,
+    }));
 
-      // ================= TOKEN =================
-      const token = localStorage.getItem("accessToken");
+    // Prepare order data
+    const orderData = {
+      first_name: billingData.first_name,
+      last_name: billingData.last_name,
+      street_address: billingData.street_address,
+      apartment: billingData.apartment,
+      town_city: billingData.town_city,
+      phone_number: billingData.phone_number,
+      email: billingData.email,
 
-      // ================= LOGIN CHECK =================
-      if (!token) {
-        alert("Please login first!");
+      payment_method: billingData.payment_method,
 
-        navigate("/login");
+      subtotal: Number(subtotal.toFixed(2)),
+      discount: Number(discount.toFixed(2)),
+      shipping_charge: Number(shipping.toFixed(2)),
+      total_amount: Number(total.toFixed(2)),
 
-        return;
+      coupon_code: couponCode || "",
+
+      items: orderItems,
+    };
+
+    console.log("Sending Order:", orderData);
+
+    const response = await axios.post(
+      `${BASEURL}/api/orders/`,
+      orderData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       }
+    );
 
-      // ================= ORDER DATA =================
-      const orderData = {
-        ...billingData,
+    console.log("Order Created:", response.data);
 
-        coupon_code: couponCode || "",
+    toast.success("Order placed successfully!");
 
-        subtotal: Number(subtotal.toFixed(2)),
+    // Clear cart after successful order
+    dispatch(clearCart());
 
-        discount: Number(discount.toFixed(2)),
+    // Go to orders/success page
+    navigate("/orders");
 
-        shipping_charge: Number(shipping.toFixed(2)),
+  } catch (error) {
+    console.error(
+      "Place Order Error:",
+      error.response?.data || error
+    );
 
-        total_amount: Number(total.toFixed(2)),
-
-        // ================= ORDER ITEMS =================
-        items: cartItems.map((item) => ({
-          product: item.id,
-          quantity: Number(item.quantity),
-
-          // IMPORTANT: BACKEND PRICE REQUIRED
-          price: Number(item.price),
-        })),
-      };
-
-      console.log("ORDER DATA:", orderData);
-
-      // ================= DJANGO API =================
-      const response = await axios.post(
-        `${BASEURL}/api/orders/`,
-        orderData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      console.log("ORDER SUCCESS:", response.data);
-
-      // ================= SUCCESS =================
-      toast.success("Order placed successfully! 🎉");
-
-      // Redux cart clear
-      dispatch(clearCart());
-
-      // Success page
-      navigate("/order-success");
-
-    } catch (error) {
-
-      // ================= ERROR =================
-      console.error(
-        "ORDER ERROR:",
-        error.response?.data || error.message
-      );
-
-      // Django error
-      const errorData =
-        error.response?.data || error.message;
-
+    if (error.response?.status === 401) {
+      toast.error("Your login session has expired. Please login again.");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      navigate("/login");
+    } else {
       toast.error(
-        typeof errorData === "object"
-          ? JSON.stringify(errorData, null, 2)
-          : errorData
+        error.response?.data?.detail ||
+        "Failed to place order."
       );
-
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ================= EMPTY CART =================
   if (cartItems.length === 0) {

@@ -33,7 +33,27 @@ from rest_framework.permissions import (
     AllowAny,
     IsAdminUser,
     IsAuthenticated,
+    BasePermission,
+    SAFE_METHODS,
 )
+# =========================================================
+# ADMIN OR READ ONLY PERMISSION
+# =========================================================
+
+class IsAdminOrReadOnly(BasePermission):
+
+    def has_permission(self, request, view):
+
+        # GET / HEAD / OPTIONS -> Everyone can access
+        if request.method in SAFE_METHODS:
+            return True
+
+        # POST / PUT / PATCH / DELETE -> Admin only
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.is_staff
+        )
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -57,52 +77,72 @@ from .serializers import (
     RegisterSerializer,
     SiteSettingsSerializer,
 )
+from rest_framework.decorators import api_view, permission_classes
 
 
 # =========================================================
 # ALL PRODUCTS
 # =========================================================
 
+# =========================================================
+# ALL PRODUCTS
+# =========================================================
+
 @api_view(["GET", "POST"])
+@permission_classes([IsAdminOrReadOnly])
 def get_product(request):
 
-    # GET - All Products
+    # =====================================================
+    # GET - Public Products
+    # =====================================================
+
     if request.method == "GET":
-        products = Product.objects.all()
+
+        products = Product.objects.all().order_by("-id")
 
         search = request.GET.get("search")
 
         if search:
             products = (
-                products.filter(name__icontains=search)
-                | products.filter(description__icontains=search)
+                products.filter(
+                    Q(name__icontains=search)
+                    | Q(description__icontains=search)
+                )
             )
-        # Pagination
+
+        # =================================================
+        # PAGINATION - 20 PRODUCTS PER PAGE
+        # =================================================
+
         paginator = PageNumberPagination()
-        # paginator.page_size = 20
-        
+        paginator.page_size = 20
+
         paginated_products = paginator.paginate_queryset(
             products,
             request
         )
-        
+
         serializer = ProductSerializer(
             paginated_products,
             many=True
         )
-        
+
         return paginator.get_paginated_response(
             serializer.data
         )
-        serializer = ProductSerializer(products, many=True)
 
-        return Response(serializer.data)
+    # =====================================================
+    # POST - Admin Only
+    # =====================================================
 
-    # POST - Add / Duplicate Product
     if request.method == "POST":
-        serializer = ProductSerializer(data=request.data)
+
+        serializer = ProductSerializer(
+            data=request.data
+        )
 
         if serializer.is_valid():
+
             serializer.save()
 
             return Response(
@@ -115,12 +155,12 @@ def get_product(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-
 # =========================================================
 # SINGLE PRODUCT DETAILS
 # =========================================================
 
 @api_view(["GET", "PUT", "PATCH", "DELETE"])
+@permission_classes([IsAdminOrReadOnly])
 def get_product_details(request, id):
 
     try:
@@ -132,14 +172,22 @@ def get_product_details(request, id):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    # GET
+    # =====================================================
+    # GET - Public
+    # =====================================================
+
     if request.method == "GET":
+
         serializer = ProductSerializer(product)
 
         return Response(serializer.data)
 
-    # DELETE
+    # =====================================================
+    # DELETE - Admin Only
+    # =====================================================
+
     if request.method == "DELETE":
+
         product.delete()
 
         return Response(
@@ -147,7 +195,10 @@ def get_product_details(request, id):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-    # PUT / PATCH
+    # =====================================================
+    # PUT / PATCH - Admin Only
+    # =====================================================
+
     serializer = ProductSerializer(
         product,
         data=request.data,
@@ -155,6 +206,7 @@ def get_product_details(request, id):
     )
 
     if serializer.is_valid():
+
         serializer.save()
 
         return Response(serializer.data)
@@ -169,17 +221,119 @@ def get_product_details(request, id):
 # ALL CATEGORIES
 # =========================================================
 
-@api_view(["GET"])
-def get_category(request):
+@api_view(["GET", "POST", "PUT", "DELETE"])
+@permission_classes([IsAdminOrReadOnly])
+def get_category(request, pk=None):
 
-    categories = Category.objects.all()
+    # =====================================================
+    # GET - Public
+    # =====================================================
 
-    serializer = CategorySerializer(
-        categories,
-        many=True,
-    )
+    if request.method == "GET":
 
-    return Response(serializer.data)
+        categories = Category.objects.all()
+
+        serializer = CategorySerializer(
+            categories,
+            many=True,
+        )
+
+        return Response(serializer.data)
+
+    # =====================================================
+    # POST - Admin Only
+    # =====================================================
+
+    if request.method == "POST":
+
+        serializer = CategorySerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # =====================================================
+    # PUT - Admin Only
+    # =====================================================
+
+    if request.method == "PUT":
+
+        if pk is None:
+
+            return Response(
+                {"detail": "Category ID is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+
+            category = Category.objects.get(pk=pk)
+
+        except Category.DoesNotExist:
+
+            return Response(
+                {"detail": "Category not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = CategorySerializer(
+            category,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(serializer.data)
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # =====================================================
+    # DELETE - Admin Only
+    # =====================================================
+
+    if request.method == "DELETE":
+
+        if pk is None:
+
+            return Response(
+                {"detail": "Category ID is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+
+            category = Category.objects.get(pk=pk)
+
+        except Category.DoesNotExist:
+
+            return Response(
+                {"detail": "Category not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        category.delete()
+
+        return Response(
+            {"detail": "Category deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 # =========================================================
@@ -187,6 +341,7 @@ def get_category(request):
 # =========================================================
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_cart(request):
 
     cart, created = Cart.objects.get_or_create(
@@ -199,6 +354,7 @@ def get_cart(request):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def add_to_cart(request):
 
     product_id = request.data.get("product_id")
@@ -229,6 +385,7 @@ def add_to_cart(request):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def remove_from_cart(request):
 
     item_id = request.data.get("item_id")
@@ -246,6 +403,13 @@ def remove_from_cart(request):
 # ORDER VIEWSET
 # =========================================================
 
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from .models import Order
+from .serializers import OrderSerializer
+
+
 class OrderViewSet(viewsets.ModelViewSet):
 
     serializer_class = OrderSerializer
@@ -253,10 +417,56 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
 
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser:
+
+            return (
+                Order.objects
+                .select_related("user")
+                .prefetch_related(
+                    "items__product"
+                )
+                .all()
+                .order_by("-created_at")
+            )
+
+        return (
+            Order.objects
+            .select_related("user")
+            .prefetch_related(
+                "items__product"
+            )
+            .filter(user=user)
+            .order_by("-created_at")
+        )
+
+    def perform_create(self, serializer):
+
+        # Serializer-এর create() already
+        # request.user ব্যবহার করছে.
+        serializer.save()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        print("ORDER REQUEST USER:", user)
+        print("USER ID:", user.id)
+        print("IS STAFF:", user.is_staff)
+
+        if user.is_staff:
+            return Order.objects.all().order_by("-created_at")
+
         return Order.objects.filter(
-            user=self.request.user
+            user=user
         ).order_by("-created_at")
 
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user
+        )
 
 # =========================================================
 # CUSTOMER LIST

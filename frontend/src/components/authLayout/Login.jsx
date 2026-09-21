@@ -1,8 +1,4 @@
 
-
-
-
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
@@ -24,54 +20,71 @@ const Login = () => {
   const dispatch = useDispatch();
 
   // =========================
-  // Manual Login
+  // Save Login Data
   // =========================
-const handleLogin = async (e) => {
-  e.preventDefault();
+  const saveLoginData = (data) => {
+    // Save JWT tokens
+    localStorage.setItem("accessToken", data.access);
+    localStorage.setItem("refreshToken", data.refresh);
 
-  try {
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/auth/login/",
-      {
-        email,
-        password,
-      }
-    );
+    // Save user information
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-    console.log("LOGIN SUCCESS:", response.data);
-    console.log("LOGIN USER:", response.data.user);
-
+    // Update Redux
     dispatch(
       login({
-        user: response.data.user,
-        access: response.data.access,
-        refresh: response.data.refresh,
+        user: data.user,
+        access: data.access,
+        refresh: data.refresh,
       })
     );
+  };
 
-    toast.success("Login successful!");
+  // =========================
+  // Manual Login
+  // =========================
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-    if (
-      response.data.user?.is_staff === true ||
-      response.data.user?.is_superuser === true
-    ) {
-      navigate("/admin");
-    } else {
-      navigate("/");
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/auth/login/",
+        {
+          email,
+          password,
+        }
+      );
+
+      console.log("LOGIN SUCCESS:", response.data);
+      console.log("LOGIN USER:", response.data.user);
+
+      // Save token + user + Redux
+      saveLoginData(response.data);
+
+      toast.success("Login successful!");
+
+      // Admin login
+      if (
+        response.data.user?.is_staff === true ||
+        response.data.user?.is_superuser === true
+      ) {
+        navigate("/admin");
+      } else {
+        // Normal customer login
+        navigate("/");
+      }
+    } catch (error) {
+      console.log("LOGIN ERROR:", error);
+      console.log("RESPONSE DATA:", error.response?.data);
+
+      toast.error(
+        error.response?.data?.detail ||
+          JSON.stringify(error.response?.data) ||
+          error.message ||
+          "Login failed!"
+      );
     }
-
-  } catch (error) {
-    console.log("LOGIN ERROR:", error);
-    console.log("RESPONSE DATA:", error.response?.data);
-
-    toast.error(
-      error.response?.data?.detail ||
-        JSON.stringify(error.response?.data) ||
-        error.message ||
-        "Login failed!"
-    );
-  }
-};
+  };
 
   // =========================
   // Google Login
@@ -89,14 +102,8 @@ const handleLogin = async (e) => {
 
       console.log("GOOGLE LOGIN SUCCESS:", response.data);
 
-      // Redux update
-      dispatch(
-        login({
-          user: response.data.user,
-          access: response.data.access,
-          refresh: response.data.refresh,
-        })
-      );
+      // Save token + user + Redux
+      saveLoginData(response.data);
 
       toast.success("Google login successful!");
 
@@ -113,18 +120,43 @@ const handleLogin = async (e) => {
   };
 
   return (
-    <div className="w-full">
-      {/* TITLE */}
-      <h1 className="text-2xl font-semibold text-gray-800 sm:text-3xl lg:text-4xl">
+    <div className="w-full max-w-xl mx-auto">
+      {/* =========================
+          TITLE
+      ========================== */}
+      <h1
+        className="
+          text-2xl
+          font-semibold
+          text-gray-800
+          sm:text-3xl
+          lg:text-4xl
+          leading-tight
+        "
+      >
         Log in to Exclusive
       </h1>
 
-      <p className="mt-2 mb-7 text-sm text-black sm:mb-10 sm:text-base">
+      <p
+        className="
+          mt-2
+          mb-7
+          text-sm
+          text-black
+          sm:mb-10
+          sm:text-base
+        "
+      >
         Enter your details below
       </p>
 
+      {/* =========================
+          LOGIN FORM
+      ========================== */}
       <form onSubmit={handleLogin} className="w-full">
-        {/* EMAIL */}
+        {/* =========================
+            EMAIL
+        ========================== */}
         <div className="mb-5 sm:mb-6">
           <input
             type="email"
@@ -132,15 +164,25 @@ const handleLogin = async (e) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             className="
-              w-full border-b border-gray-300 bg-transparent
-              py-3 text-sm outline-none transition
-              focus:border-[#DB4444] sm:text-base
+              w-full
+              border-b
+              border-gray-300
+              bg-transparent
+              py-3
+              text-sm
+              outline-none
+              transition
+              focus:border-[#DB4444]
+              sm:text-base
             "
           />
         </div>
 
-        {/* PASSWORD */}
+        {/* =========================
+            PASSWORD
+        ========================== */}
         <div className="relative mb-7">
           <input
             type={showPassword ? "text" : "password"}
@@ -148,38 +190,83 @@ const handleLogin = async (e) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
             className="
-              w-full border-b border-gray-300 bg-transparent
-              py-3 pr-10 text-sm outline-none transition
-              focus:border-[#DB4444] sm:text-base
+              w-full
+              border-b
+              border-gray-300
+              bg-transparent
+              py-3
+              pr-10
+              text-sm
+              outline-none
+              transition
+              focus:border-[#DB4444]
+              sm:text-base
             "
           />
 
           {/* EYE BUTTON */}
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={
+              showPassword
+                ? "Hide password"
+                : "Show password"
+            }
             className="
-              absolute right-2 top-1/2
+              absolute
+              right-2
+              top-1/2
               -translate-y-1/2
               cursor-pointer
               text-gray-500
+              transition
               hover:text-[#DB4444]
+              p-1
             "
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
+            {showPassword ? (
+              <FaEyeSlash />
+            ) : (
+              <FaEye />
+            )}
           </button>
         </div>
 
-        {/* LOGIN + FORGET PASSWORD */}
-        <div className="flex items-center justify-between gap-3">
+        {/* =========================
+            LOGIN + FORGET PASSWORD
+        ========================== */}
+        <div
+          className="
+            flex
+            flex-col
+            gap-4
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
+            sm:gap-3
+          "
+        >
           <button
             type="submit"
             className="
-              cursor-pointer rounded-sm bg-[#DB4444]
-              px-6 py-3 text-sm text-white
-              transition duration-300 hover:bg-red-600
-              sm:px-10 sm:py-3.5 sm:text-base
+              w-full
+              cursor-pointer
+              rounded-sm
+              bg-[#DB4444]
+              px-6
+              py-3
+              text-sm
+              text-white
+              transition
+              duration-300
+              hover:bg-red-600
+              sm:w-auto
+              sm:px-10
+              sm:py-3.5
+              sm:text-base
             "
           >
             Log in
@@ -188,43 +275,68 @@ const handleLogin = async (e) => {
           <Link
             to="/forgot-password"
             className="
-              whitespace-nowrap text-sm text-[#DB4444]
-              transition hover:underline sm:text-base
+              text-center
+              whitespace-nowrap
+              text-sm
+              text-[#DB4444]
+              transition
+              hover:underline
+              sm:text-left
+              sm:text-base
             "
           >
             Forget Password?
           </Link>
         </div>
 
-        {/* GOOGLE LOGIN */}
+        {/* =========================
+            GOOGLE LOGIN
+        ========================== */}
         <div className="relative mt-5 w-full">
-          {/* CUSTOM BUTTON */}
+          {/* CUSTOM GOOGLE BUTTON */}
           <button
             type="button"
             className="
-      w-full
-      h-[48px]
-      flex items-center justify-center
-      gap-2
-      rounded-sm
-      border border-gray-300
-      bg-white
-      text-sm sm:text-base
-      transition duration-300
-      hover:bg-gray-50
-      cursor-pointer
-    "
+              flex
+              h-[48px]
+              w-full
+              cursor-pointer
+              items-center
+              justify-center
+              gap-2
+              rounded-sm
+              border
+              border-gray-300
+              bg-white
+              text-sm
+              transition
+              duration-300
+              hover:bg-gray-50
+              sm:text-base
+            "
           >
             <FcGoogle className="text-xl sm:text-2xl" />
-            <span>Login with Google</span>
+
+            <span>
+              Login with Google
+            </span>
           </button>
 
           {/* GOOGLE CLICK AREA */}
-          <div className="absolute inset-0 opacity-0 cursor-pointer">
+          <div
+            className="
+              absolute
+              inset-0
+              cursor-pointer
+              opacity-0
+            "
+          >
             <GoogleLogin
               onSuccess={handleGoogleLogin}
               onError={() => {
-                toast.error("Google login failed!");
+                toast.error(
+                  "Google login failed!"
+                );
               }}
               width="100%"
               theme="outline"
@@ -234,12 +346,29 @@ const handleLogin = async (e) => {
         </div>
       </form>
 
-      {/* REGISTER LINK */}
-      <p className="mt-6 text-center text-sm text-gray-600 sm:text-base">
+      {/* =========================
+          REGISTER LINK
+      ========================== */}
+      <p
+        className="
+          mt-6
+          text-center
+          text-sm
+          text-gray-600
+          sm:text-base
+        "
+      >
         Don't have an account?{" "}
+
         <Link
           to="/register"
-          className="text-blue-400 underline underline-offset-4"
+          className="
+            text-blue-400
+            underline
+            underline-offset-4
+            transition
+            hover:text-blue-500
+          "
         >
           Create Account
         </Link>
@@ -249,3 +378,4 @@ const handleLogin = async (e) => {
 };
 
 export default Login;
+

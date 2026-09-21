@@ -29,6 +29,7 @@ import Sales from "./admin/Pages/Sales.jsx";
 import Customers from "./admin/Pages/Customers.jsx";
 import Newsletter from "./admin/Pages/Newsletter.jsx";
 import Settings from "./admin/Pages/Settings.jsx";
+import Categories from "./admin/Pages/AdminCategory.jsx";
 
 
 
@@ -137,6 +138,12 @@ const router = createBrowserRouter([
       {
         path: "analytics",
         element: <Analytics />,
+      },
+
+      {
+        path: "categories",
+        element: <Categories/>
+
       },
 
       // Products

@@ -149,44 +149,49 @@ const AdminSidebar = ({
   // =====================================================
   // MENU
   // =====================================================
-  const menuItems = [
-    {
-      label: "Dashboard",
-      path: "/admin",
-    },
-    {
-      label: "Analytics",
-      path: "/admin/analytics",
-    },
-    {
-      label: "Products",
-      path: "/admin/products",
-    },
-    {
-      label: "Inventory",
-      path: "/admin/inventory",
-    },
-    {
-      label: "Orders",
-      path: "/admin/orders",
-    },
-    {
-      label: "Sales",
-      path: "/admin/sales",
-    },
-    {
-      label: "Customers",
-      path: "/admin/customers",
-    },
-    {
-      label: "Newsletter",
-      path: "/admin/newsletter",
-    },
-    {
-      label: "Settings",
-      path: "/admin/settings",
-    },
-  ];
+
+ const menuItems = [
+  {
+    label: "Dashboard",
+    path: "/admin",
+  },
+  {
+    label: "Analytics",
+    path: "/admin/analytics",
+  },
+  {
+    label: "Products",
+    path: "/admin/products",
+  },
+  {
+    label: "categories",
+    path: "/admin/categories",
+  },
+  {
+    label: "Inventory",
+    path: "/admin/inventory",
+  },
+  {
+    label: "Orders",
+    path: "/admin/orders",
+  },
+  {
+    label: "Sales",
+    path: "/admin/sales",
+  },
+  {
+    label: "Customers",
+    path: "/admin/customers",
+  },
+  {
+    label: "Newsletter",
+    path: "/admin/newsletter",
+  },
+  {
+    label: "Settings",
+    path: "/admin/settings",
+  },
+];
 
   return (
     <>

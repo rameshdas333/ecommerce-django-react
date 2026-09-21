@@ -152,7 +152,7 @@ const ProductList = () => {
   // ==========================================
 
   return (
-    <div className="min-h-screen bg-gray-100 py-4">
+   <div className="min-h-screen bg-gray-100 px-3 sm:px-5 md:px-8 lg:px-12 py-4">
 
       {/* ==========================================
           SEARCH RESULT TEXT
@@ -183,7 +183,7 @@ const ProductList = () => {
               PRODUCT GRID
           ========================================== */}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 p-2 sm:p-4">
 
             {products.map((product) => {
 
@@ -222,7 +222,7 @@ const ProductList = () => {
                       PRODUCT NAME
                   ========================================== */}
 
-                  <h2 className="text-xl font-semibold mb-2">
+                  <h2 className="text-[16px] font-semibold mb-2">
                     {product.name}
                   </h2>
 

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
@@ -50,6 +51,10 @@ const statusConfig = {
   },
 };
 
+/* =========================
+   STATUS
+========================= */
+
 const normalizeStatus = (status) => {
   if (!status) return "Pending";
 
@@ -59,13 +64,19 @@ const normalizeStatus = (status) => {
   if (value === "processing") return "Processing";
   if (value === "shipped") return "Shipped";
   if (value === "delivered") return "Delivered";
-  if (value === "cancelled" || value === "canceled") return "Cancelled";
+  if (value === "cancelled" || value === "canceled") {
+    return "Cancelled";
+  }
 
   return (
     String(status).charAt(0).toUpperCase() +
     String(status).slice(1).toLowerCase()
   );
 };
+
+/* =========================
+   ORDER ID
+========================= */
 
 const getOrderId = (order) => {
   return order?.id || order?.order_id || order?.pk;
@@ -76,12 +87,32 @@ const getOrderId = (order) => {
 ========================= */
 
 const getCustomerName = (order) => {
+  // Backend SerializerMethodField
+  if (order?.customer_name) {
+    return order.customer_name;
+  }
+
   const firstName = order?.first_name || "";
   const lastName = order?.last_name || "";
 
   const fullName = `${firstName} ${lastName}`.trim();
 
-  return fullName || "N/A";
+  if (fullName) {
+    return fullName;
+  }
+
+  // Fallback for nested user
+  if (order?.user?.first_name || order?.user?.last_name) {
+    return `${order?.user?.first_name || ""} ${
+      order?.user?.last_name || ""
+    }`.trim();
+  }
+
+  if (order?.user?.username) {
+    return order.user.username;
+  }
+
+  return "N/A";
 };
 
 /* =========================
@@ -89,7 +120,12 @@ const getCustomerName = (order) => {
 ========================= */
 
 const getCustomerEmail = (order) => {
-  return order?.email || "N/A";
+  return (
+    order?.customer_email ||
+    order?.email ||
+    order?.user?.email ||
+    "N/A"
+  );
 };
 
 /* =========================
@@ -97,8 +133,17 @@ const getCustomerEmail = (order) => {
 ========================= */
 
 const getCustomerPhone = (order) => {
-  return order?.phone_number || "N/A";
+  return (
+    order?.customer_phone ||
+    order?.phone_number ||
+    order?.user?.phone_number ||
+    "N/A"
+  );
 };
+
+/* =========================
+   ORDER DATE
+========================= */
 
 const getOrderDate = (order) => {
   return (
@@ -110,11 +155,21 @@ const getOrderDate = (order) => {
   );
 };
 
+/* =========================
+   ORDER STATUS
+========================= */
+
 const getOrderStatus = (order) => {
   return normalizeStatus(
-    order?.status || order?.order_status || order?.orderStatus
+    order?.status ||
+      order?.order_status ||
+      order?.orderStatus
   );
 };
+
+/* =========================
+   ORDER TOTAL
+========================= */
 
 const getOrderTotal = (order) => {
   return (
@@ -128,6 +183,10 @@ const getOrderTotal = (order) => {
   );
 };
 
+/* =========================
+   ORDER ITEMS
+========================= */
+
 const getOrderItems = (order) => {
   return (
     order?.items ||
@@ -137,6 +196,10 @@ const getOrderItems = (order) => {
     []
   );
 };
+
+/* =========================
+   DATE FORMAT
+========================= */
 
 const formatDate = (date) => {
   if (!date) return "N/A";
@@ -153,6 +216,10 @@ const formatDate = (date) => {
     day: "numeric",
   });
 };
+
+/* =========================
+   DATE TIME FORMAT
+========================= */
 
 const formatDateTime = (date) => {
   if (!date) return "N/A";
@@ -172,6 +239,10 @@ const formatDateTime = (date) => {
   });
 };
 
+/* =========================
+   PRODUCT NAME
+========================= */
+
 const getProductName = (item) => {
   return (
     item?.product?.name ||
@@ -182,9 +253,17 @@ const getProductName = (item) => {
   );
 };
 
+/* =========================
+   PRODUCT QUANTITY
+========================= */
+
 const getProductQuantity = (item) => {
   return Number(item?.quantity ?? item?.qty ?? 1);
 };
+
+/* =========================
+   PRODUCT PRICE
+========================= */
 
 const getProductPrice = (item) => {
   return Number(
@@ -195,6 +274,10 @@ const getProductPrice = (item) => {
       0
   );
 };
+
+/* =========================
+   PRODUCT IMAGE
+========================= */
 
 const getProductImage = (item) => {
   const image =
@@ -209,11 +292,18 @@ const getProductImage = (item) => {
     return image;
   }
 
-  return `${BASEURL}${String(image).startsWith("/") ? "" : "/"}${image}`;
+  return `${BASEURL}${
+    String(image).startsWith("/") ? "" : "/"
+  }${image}`;
 };
+
+/* =========================================================
+   ORDERS COMPONENT
+========================================================= */
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -224,21 +314,93 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] =
+    useState(false);
 
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [updatingStatus, setUpdatingStatus] =
+    useState(false);
 
-  const getAuthHeaders = () => {
-    const token =
+  /* =========================================================
+     TOKEN HELPERS
+  ========================================================= */
+
+  const getAccessToken = () => {
+    return (
       localStorage.getItem("accessToken") ||
-      localStorage.getItem("access_token");
-
-    return token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : {};
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("access") ||
+      null
+    );
   };
+
+  const getRefreshToken = () => {
+    return (
+      localStorage.getItem("refreshToken") ||
+      localStorage.getItem("refresh_token") ||
+      localStorage.getItem("refresh") ||
+      null
+    );
+  };
+
+  const saveAccessToken = (token) => {
+    if (!token) return;
+
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("access_token", token);
+  };
+
+  const saveRefreshToken = (token) => {
+    if (!token) return;
+
+    localStorage.setItem("refreshToken", token);
+    localStorage.setItem("refresh_token", token);
+  };
+
+  /* =========================================================
+     REFRESH ACCESS TOKEN
+  ========================================================= */
+
+  const refreshAccessToken = async () => {
+    const refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post(
+        `${BASEURL}/api/auth/token/refresh/`,
+        {
+          refresh: refreshToken,
+        }
+      );
+
+      const newAccessToken = response.data?.access;
+
+      if (!newAccessToken) {
+        return null;
+      }
+
+      saveAccessToken(newAccessToken);
+
+      if (response.data?.refresh) {
+        saveRefreshToken(response.data.refresh);
+      }
+
+      return newAccessToken;
+    } catch (error) {
+      console.error(
+        "Order token refresh error:",
+        error.response?.data || error.message
+      );
+
+      return null;
+    }
+  };
+
+  /* =========================================================
+     FETCH ORDERS
+  ========================================================= */
 
   const fetchOrders = async (showRefresh = false) => {
     try {
@@ -248,30 +410,155 @@ const Orders = () => {
         setLoading(true);
       }
 
-      const response = await axios.get(`${BASEURL}/api/orders/`, {
-        headers: getAuthHeaders(),
-      });
+      /* =========================
+         GET ACCESS TOKEN
+      ========================= */
+
+      let token = getAccessToken();
+
+      /* =========================
+         NO ACCESS TOKEN
+         TRY REFRESH
+      ========================= */
+
+      if (!token) {
+        token = await refreshAccessToken();
+      }
+
+      if (!token) {
+        setOrders([]);
+
+        toast.error("Please login again.", {
+          toastId: "orders-auth-error",
+        });
+
+        return;
+      }
+
+      let response;
+
+      /* =========================
+         FIRST API REQUEST
+      ========================= */
+
+      try {
+        response = await axios.get(
+          `${BASEURL}/api/orders/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
+          }
+        );
+      } catch (error) {
+        /* =========================
+           TOKEN EXPIRED → REFRESH
+        ========================= */
+
+        if (error.response?.status === 401) {
+          console.log(
+            "Access token expired. Refreshing token..."
+          );
+
+          const newToken =
+            await refreshAccessToken();
+
+          if (!newToken) {
+            setOrders([]);
+
+            toast.error(
+              "Session expired. Please login again.",
+              {
+                toastId: "orders-auth-error",
+              }
+            );
+
+            return;
+          }
+
+          /* =========================
+             RETRY REQUEST
+          ========================= */
+
+          response = await axios.get(
+            `${BASEURL}/api/orders/`,
+            {
+              headers: {
+                Authorization: `Bearer ${newToken}`,
+                Accept: "application/json",
+              },
+            }
+          );
+        } else {
+          throw error;
+        }
+      }
+
+      /* =========================
+         API RESPONSE
+      ========================= */
 
       const data = response.data;
 
+      console.log("Orders API response:", data);
+
       let orderList = [];
 
+      /* Normal array */
       if (Array.isArray(data)) {
         orderList = data;
-      } else if (Array.isArray(data?.results)) {
+      }
+
+      /* DRF pagination */
+      else if (Array.isArray(data?.results)) {
         orderList = data.results;
-      } else if (Array.isArray(data?.orders)) {
+      }
+
+      /* Custom orders */
+      else if (Array.isArray(data?.orders)) {
         orderList = data.orders;
       }
 
+      /* Custom data */
+      else if (Array.isArray(data?.data)) {
+        orderList = data.data;
+      }
+
+      console.log("Orders loaded:", orderList);
+
       setOrders(orderList);
     } catch (error) {
-      console.error("Orders fetch error:", error);
+      console.error(
+        "Orders fetch error:",
+        error.response?.data || error.message
+      );
 
       if (error.response?.status === 401) {
-        toast.error("Please login again.");
+        toast.error(
+          "Authentication failed. Please login again.",
+          {
+            toastId: "orders-auth-error",
+          }
+        );
+      } else if (error.response?.status === 403) {
+        toast.error(
+          "You do not have permission to view orders.",
+          {
+            toastId: "orders-permission-error",
+          }
+        );
+      } else if (error.response?.status === 500) {
+        toast.error(
+          "Server error while loading orders.",
+          {
+            toastId: "orders-server-error",
+          }
+        );
       } else {
-        toast.error("Failed to load orders.");
+        toast.error("Failed to load orders.", {
+          toastId: "orders-load-error",
+        });
       }
     } finally {
       setLoading(false);
@@ -279,9 +566,17 @@ const Orders = () => {
     }
   };
 
+  /* =========================================================
+     INITIAL LOAD
+  ========================================================= */
+
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  /* =========================================================
+     STATS
+  ========================================================= */
 
   const stats = useMemo(() => {
     const total = orders.length;
@@ -316,20 +611,30 @@ const Orders = () => {
     };
   }, [orders]);
 
+  /* =========================================================
+     FILTER
+  ========================================================= */
+
   const filteredOrders = useMemo(() => {
     let result = [...orders];
 
     const searchValue = search.trim().toLowerCase();
 
+    /* Search */
     if (searchValue) {
       result = result.filter((order) => {
-        const id = String(getOrderId(order) || "").toLowerCase();
+        const id = String(
+          getOrderId(order) || ""
+        ).toLowerCase();
 
-        const customer = getCustomerName(order).toLowerCase();
+        const customer =
+          getCustomerName(order).toLowerCase();
 
-        const email = getCustomerEmail(order).toLowerCase();
+        const email =
+          getCustomerEmail(order).toLowerCase();
 
-        const phone = getCustomerPhone(order).toLowerCase();
+        const phone =
+          getCustomerPhone(order).toLowerCase();
 
         return (
           id.includes(searchValue) ||
@@ -340,40 +645,56 @@ const Orders = () => {
       });
     }
 
+    /* Status */
     if (statusFilter !== "All") {
       result = result.filter(
-        (order) => getOrderStatus(order) === statusFilter
+        (order) =>
+          getOrderStatus(order) === statusFilter
       );
     }
 
+    /* Date */
     if (dateFilter !== "All") {
       const now = new Date();
 
       result = result.filter((order) => {
-        const orderDateValue = getOrderDate(order);
+        const orderDateValue =
+          getOrderDate(order);
 
         if (!orderDateValue) return false;
 
-        const orderDate = new Date(orderDateValue);
+        const orderDate =
+          new Date(orderDateValue);
 
-        if (Number.isNaN(orderDate.getTime())) {
+        if (
+          Number.isNaN(orderDate.getTime())
+        ) {
           return false;
         }
 
         if (dateFilter === "Today") {
-          return orderDate.toDateString() === now.toDateString();
+          return (
+            orderDate.toDateString() ===
+            now.toDateString()
+          );
         }
 
         if (dateFilter === "7 Days") {
           const sevenDaysAgo = new Date();
-          sevenDaysAgo.setDate(now.getDate() - 7);
+
+          sevenDaysAgo.setDate(
+            now.getDate() - 7
+          );
 
           return orderDate >= sevenDaysAgo;
         }
 
         if (dateFilter === "30 Days") {
           const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(now.getDate() - 30);
+
+          thirtyDaysAgo.setDate(
+            now.getDate() - 30
+          );
 
           return orderDate >= thirtyDaysAgo;
         }
@@ -383,36 +704,68 @@ const Orders = () => {
     }
 
     return result;
-  }, [orders, search, statusFilter, dateFilter]);
+  }, [
+    orders,
+    search,
+    statusFilter,
+    dateFilter,
+  ]);
+
+  /* =========================================================
+     FRONTEND PAGINATION
+  ========================================================= */
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredOrders.length / ORDERS_PER_PAGE)
+    Math.ceil(
+      filteredOrders.length /
+        ORDERS_PER_PAGE
+    )
   );
 
   const currentOrders = useMemo(() => {
-    const startIndex = (currentPage - 1) * ORDERS_PER_PAGE;
+    const startIndex =
+      (currentPage - 1) *
+      ORDERS_PER_PAGE;
 
     return filteredOrders.slice(
       startIndex,
       startIndex + ORDERS_PER_PAGE
     );
-  }, [filteredOrders, currentPage]);
+  }, [
+    filteredOrders,
+    currentPage,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusFilter, dateFilter]);
+  }, [
+    search,
+    statusFilter,
+    dateFilter,
+  ]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
-  }, [currentPage, totalPages]);
+  }, [
+    currentPage,
+    totalPages,
+  ]);
+
+  /* =========================================================
+     OPEN DETAILS
+  ========================================================= */
 
   const openOrderDetails = (order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
   };
+
+  /* =========================================================
+     CLOSE DETAILS
+  ========================================================= */
 
   const closeOrderDetails = () => {
     if (updatingStatus) return;
@@ -421,79 +774,210 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-  const updateOrderStatus = async (newStatus) => {
+  /* =========================================================
+     UPDATE ORDER STATUS
+  ========================================================= */
+
+  const updateOrderStatus = async (
+    newStatus
+  ) => {
     if (!selectedOrder) return;
 
-    const orderId = getOrderId(selectedOrder);
+    const orderId =
+      getOrderId(selectedOrder);
 
     if (!orderId) {
-      toast.error("Order ID not found.");
+      toast.error("Order ID not found.", {
+        toastId: "order-id-error",
+      });
+
       return;
     }
 
     try {
       setUpdatingStatus(true);
 
-      const response = await axios.patch(
-        `${BASEURL}/api/orders/${orderId}/`,
-        {
-          status: newStatus.toLowerCase(),
-        },
-        {
-          headers: {
-            ...getAuthHeaders(),
-            "Content-Type": "application/json",
+      /* =========================
+         GET TOKEN
+      ========================= */
+
+      let token = getAccessToken();
+
+      if (!token) {
+        token = await refreshAccessToken();
+      }
+
+      if (!token) {
+        toast.error("Please login again.", {
+          toastId: "orders-auth-error",
+        });
+
+        return;
+      }
+
+      let response;
+
+      try {
+        /* =========================
+           FIRST PATCH
+        ========================= */
+
+        response = await axios.patch(
+          `${BASEURL}/api/orders/${orderId}/`,
+          {
+            status:
+              newStatus.toLowerCase(),
           },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
+      } catch (error) {
+        /* =========================
+           TOKEN EXPIRED
+        ========================= */
+
+        if (
+          error.response?.status === 401
+        ) {
+          const newToken =
+            await refreshAccessToken();
+
+          if (!newToken) {
+            toast.error(
+              "Session expired. Please login again.",
+              {
+                toastId:
+                  "orders-auth-error",
+              }
+            );
+
+            return;
+          }
+
+          /* =========================
+             RETRY PATCH
+          ========================= */
+
+          response = await axios.patch(
+            `${BASEURL}/api/orders/${orderId}/`,
+            {
+              status:
+                newStatus.toLowerCase(),
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${newToken}`,
+                "Content-Type":
+                  "application/json",
+              },
+            }
+          );
+        } else {
+          throw error;
         }
+      }
+
+      const updatedOrder =
+        response.data;
+
+      /* =========================
+         UPDATE ORDER LIST
+      ========================= */
+
+      setOrders(
+        (previousOrders) =>
+          previousOrders.map(
+            (order) =>
+              getOrderId(order) ===
+              orderId
+                ? updatedOrder?.id
+                  ? updatedOrder
+                  : {
+                      ...order,
+                      status:
+                        newStatus.toLowerCase(),
+                    }
+                : order
+          )
       );
 
-      const updatedOrder = response.data;
+      /* =========================
+         UPDATE SELECTED ORDER
+      ========================= */
 
-      setOrders((previousOrders) =>
-        previousOrders.map((order) =>
-          getOrderId(order) === orderId
+      setSelectedOrder(
+        (previous) =>
+          previous
             ? updatedOrder?.id
               ? updatedOrder
               : {
-                  ...order,
-                  status: newStatus.toLowerCase(),
+                  ...previous,
+                  status:
+                    newStatus.toLowerCase(),
                 }
-            : order
-        )
+            : previous
       );
 
-      setSelectedOrder((previous) =>
-        previous
-          ? updatedOrder?.id
-            ? updatedOrder
-            : {
-                ...previous,
-                status: newStatus.toLowerCase(),
-              }
-          : previous
+      toast.success(
+        `Order status changed to ${newStatus}.`,
+        {
+          toastId:
+            "order-status-success",
+        }
       );
-
-      toast.success(`Order status changed to ${newStatus}.`);
     } catch (error) {
-      console.error("Status update error:", error);
+      console.error(
+        "Status update error:",
+        error.response?.data ||
+          error.message
+      );
 
-      if (error.response?.status === 401) {
-        toast.error("Please login again.");
-      } else if (error.response?.status === 403) {
+      if (
+        error.response?.status === 401
+      ) {
         toast.error(
-          "You do not have permission to update this order."
+          "Authentication failed. Please login again.",
+          {
+            toastId:
+              "orders-auth-error",
+          }
+        );
+      } else if (
+        error.response?.status === 403
+      ) {
+        toast.error(
+          "You do not have permission to update this order.",
+          {
+            toastId:
+              "orders-status-permission-error",
+          }
         );
       } else {
         toast.error(
-          error.response?.data?.detail ||
-            error.response?.data?.message ||
-            "Failed to update order status."
+          error.response?.data
+            ?.detail ||
+            error.response?.data
+              ?.message ||
+            "Failed to update order status.",
+          {
+            toastId:
+              "order-status-error",
+          }
         );
       }
     } finally {
       setUpdatingStatus(false);
     }
   };
+
+  /* =========================================================
+     RESET FILTERS
+  ========================================================= */
 
   const resetFilters = () => {
     setSearch("");
@@ -502,9 +986,14 @@ const Orders = () => {
     setCurrentPage(1);
   };
 
+  /* =========================================================
+     UI
+  ========================================================= */
+
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
       {/* Header */}
+
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">
@@ -522,14 +1011,21 @@ const Orders = () => {
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           <FiRefreshCw
-            className={refreshing ? "animate-spin" : ""}
+            className={
+              refreshing
+                ? "animate-spin"
+                : ""
+            }
           />
 
-          {refreshing ? "Refreshing..." : "Refresh"}
+          {refreshing
+            ? "Refreshing..."
+            : "Refresh"}
         </button>
       </div>
 
       {/* Stats */}
+
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatBox
           title="Total Orders"
@@ -575,6 +1071,7 @@ const Orders = () => {
       </div>
 
       {/* Filters */}
+
       <div className="mb-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <FiFilter className="text-gray-500" />
@@ -586,45 +1083,87 @@ const Orders = () => {
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
           {/* Search */}
+
           <div className="relative">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               placeholder="Search order, customer..."
               className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-[#DB4444] focus:bg-white focus:ring-2 focus:ring-[#DB4444]/10"
             />
           </div>
 
           {/* Status */}
+
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) =>
+              setStatusFilter(
+                e.target.value
+              )
+            }
             className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none focus:border-[#DB4444] focus:bg-white"
           >
-            <option value="All">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Processing">Processing</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-            <option value="Cancelled">Cancelled</option>
+            <option value="All">
+              All Status
+            </option>
+
+            <option value="Pending">
+              Pending
+            </option>
+
+            <option value="Processing">
+              Processing
+            </option>
+
+            <option value="Shipped">
+              Shipped
+            </option>
+
+            <option value="Delivered">
+              Delivered
+            </option>
+
+            <option value="Cancelled">
+              Cancelled
+            </option>
           </select>
 
           {/* Date */}
+
           <select
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
+            onChange={(e) =>
+              setDateFilter(
+                e.target.value
+              )
+            }
             className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none focus:border-[#DB4444] focus:bg-white"
           >
-            <option value="All">All Dates</option>
-            <option value="Today">Today</option>
-            <option value="7 Days">Last 7 Days</option>
-            <option value="30 Days">Last 30 Days</option>
+            <option value="All">
+              All Dates
+            </option>
+
+            <option value="Today">
+              Today
+            </option>
+
+            <option value="7 Days">
+              Last 7 Days
+            </option>
+
+            <option value="30 Days">
+              Last 30 Days
+            </option>
           </select>
 
           {/* Reset */}
+
           <button
             onClick={resetFilters}
             className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
@@ -635,6 +1174,7 @@ const Orders = () => {
       </div>
 
       {/* Orders Table */}
+
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="flex flex-col gap-2 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -646,13 +1186,17 @@ const Orders = () => {
               Showing{" "}
               {filteredOrders.length === 0
                 ? 0
-                : (currentPage - 1) * ORDERS_PER_PAGE + 1}
+                : (currentPage - 1) *
+                    ORDERS_PER_PAGE +
+                  1}
               {" - "}
               {Math.min(
-                currentPage * ORDERS_PER_PAGE,
+                currentPage *
+                  ORDERS_PER_PAGE,
                 filteredOrders.length
               )}{" "}
-              of {filteredOrders.length} orders
+              of {filteredOrders.length}{" "}
+              orders
             </p>
           </div>
         </div>
@@ -660,10 +1204,13 @@ const Orders = () => {
         {loading ? (
           <LoadingState />
         ) : filteredOrders.length === 0 ? (
-          <EmptyState resetFilters={resetFilters} />
+          <EmptyState
+            resetFilters={resetFilters}
+          />
         ) : (
           <>
             {/* Desktop / Tablet Table */}
+
             <div className="overflow-x-auto">
               <table className="min-w-[950px] w-full">
                 <thead>
@@ -699,131 +1246,213 @@ const Orders = () => {
                 </thead>
 
                 <tbody>
-                  {currentOrders.map((order) => {
-                    const orderId = getOrderId(order);
-                    const status = getOrderStatus(order);
-                    const StatusIcon =
-                      statusConfig[status]?.icon || FiClock;
+                  {currentOrders.map(
+                    (order) => {
+                      const orderId =
+                        getOrderId(order);
 
-                    const statusColor =
-                      statusConfig[status]?.color ||
-                      "bg-gray-100 text-gray-700";
+                      const status =
+                        getOrderStatus(
+                          order
+                        );
 
-                    const items = getOrderItems(order);
+                      const StatusIcon =
+                        statusConfig[
+                          status
+                        ]?.icon ||
+                        FiClock;
 
-                    const itemCount = Array.isArray(items)
-                      ? items.reduce(
-                          (sum, item) =>
-                            sum + getProductQuantity(item),
-                          0
+                      const statusColor =
+                        statusConfig[
+                          status
+                        ]?.color ||
+                        "bg-gray-100 text-gray-700";
+
+                      const items =
+                        getOrderItems(
+                          order
+                        );
+
+                      const itemCount =
+                        Array.isArray(
+                          items
                         )
-                      : Number(order?.total_items || 0);
+                          ? items.reduce(
+                              (
+                                sum,
+                                item
+                              ) =>
+                                sum +
+                                getProductQuantity(
+                                  item
+                                ),
+                              0
+                            )
+                          : Number(
+                              order?.total_items ||
+                                0
+                            );
 
-                    return (
-                      <tr
-                        key={orderId}
-                        className="border-b border-gray-100 transition hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-4">
-                          <p className="font-semibold text-gray-800">
-                            #{orderId}
-                          </p>
+                      return (
+                        <tr
+                          key={orderId}
+                          className="border-b border-gray-100 transition hover:bg-gray-50"
+                        >
+                          <td className="px-4 py-4">
+                            <p className="font-semibold text-gray-800">
+                              #{orderId}
+                            </p>
 
-                          <p className="mt-1 text-xs text-gray-400">
-                            Order ID
-                          </p>
-                        </td>
+                            <p className="mt-1 text-xs text-gray-400">
+                              Order ID
+                            </p>
+                          </td>
 
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-sm font-semibold text-[#DB4444]">
-                              {getCustomerName(order)
-                                .charAt(0)
-                                .toUpperCase()}
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-sm font-semibold text-[#DB4444]">
+                                {getCustomerName(
+                                  order
+                                )
+                                  .charAt(
+                                    0
+                                  )
+                                  .toUpperCase()}
+                              </div>
+
+                              <div>
+                                <p className="font-medium text-gray-800">
+                                  {getCustomerName(
+                                    order
+                                  )}
+                                </p>
+
+                                <p className="max-w-[180px] truncate text-xs text-gray-400">
+                                  {getCustomerEmail(
+                                    order
+                                  )}
+                                </p>
+
+                                <p className="mt-0.5 text-xs text-gray-400">
+                                  {getCustomerPhone(
+                                    order
+                                  )}
+                                </p>
+                              </div>
                             </div>
+                          </td>
 
-                            <div>
-                              <p className="font-medium text-gray-800">
-                                {getCustomerName(order)}
-                              </p>
+                          <td className="px-4 py-4 text-sm text-gray-600">
+                            {formatDate(
+                              getOrderDate(
+                                order
+                              )
+                            )}
+                          </td>
 
-                              <p className="max-w-[180px] truncate text-xs text-gray-400">
-                                {getCustomerEmail(order)}
-                              </p>
+                          <td className="px-4 py-4 text-sm text-gray-600">
+                            {itemCount}{" "}
+                            item
+                            {itemCount !==
+                            1
+                              ? "s"
+                              : ""}
+                          </td>
 
-                              <p className="mt-0.5 text-xs text-gray-400">
-                                {getCustomerPhone(order)}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
+                          <td className="px-4 py-4">
+                            <p className="font-semibold text-gray-800">
+                              ৳{" "}
+                              {getOrderTotal(
+                                order
+                              ).toFixed(
+                                2
+                              )}
+                            </p>
+                          </td>
 
-                        <td className="px-4 py-4 text-sm text-gray-600">
-                          {formatDate(getOrderDate(order))}
-                        </td>
+                          <td className="px-4 py-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${statusColor}`}
+                            >
+                              <StatusIcon
+                                size={
+                                  13
+                                }
+                              />
 
-                        <td className="px-4 py-4 text-sm text-gray-600">
-                          {itemCount} item
-                          {itemCount !== 1 ? "s" : ""}
-                        </td>
+                              {
+                                status
+                              }
+                            </span>
+                          </td>
 
-                        <td className="px-4 py-4">
-                          <p className="font-semibold text-gray-800">
-                            ৳ {getOrderTotal(order).toFixed(2)}
-                          </p>
-                        </td>
+                          <td className="px-4 py-4 text-center">
+                            <button
+                              onClick={() =>
+                                openOrderDetails(
+                                  order
+                                )
+                              }
+                              className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
+                            >
+                              <FiEye
+                                size={
+                                  14
+                                }
+                              />
 
-                        <td className="px-4 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${statusColor}`}
-                          >
-                            <StatusIcon size={13} />
-                            {status}
-                          </span>
-                        </td>
-
-                        <td className="px-4 py-4 text-center">
-                          <button
-                            onClick={() => openOrderDetails(order)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
-                          >
-                            <FiEye size={14} />
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
                 </tbody>
               </table>
             </div>
 
             {/* Pagination */}
+
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              setCurrentPage={setCurrentPage}
+              currentPage={
+                currentPage
+              }
+              totalPages={
+                totalPages
+              }
+              setCurrentPage={
+                setCurrentPage
+              }
             />
           </>
         )}
       </div>
 
       {/* Order Details Modal */}
-      {showDetailsModal && selectedOrder && (
-        <OrderDetailsModal
-          order={selectedOrder}
-          onClose={closeOrderDetails}
-          onStatusChange={updateOrderStatus}
-          updatingStatus={updatingStatus}
-        />
-      )}
+
+      {showDetailsModal &&
+        selectedOrder && (
+          <OrderDetailsModal
+            order={selectedOrder}
+            onClose={
+              closeOrderDetails
+            }
+            onStatusChange={
+              updateOrderStatus
+            }
+            updatingStatus={
+              updatingStatus
+            }
+          />
+        )}
     </div>
   );
 };
 
-/* =========================
+/* =========================================================
    STAT BOX
-========================= */
+========================================================= */
 
 const StatBox = ({
   title,
@@ -854,9 +1483,9 @@ const StatBox = ({
   );
 };
 
-/* =========================
+/* =========================================================
    PAGINATION
-========================= */
+========================================================= */
 
 const Pagination = ({
   currentPage,
@@ -866,16 +1495,28 @@ const Pagination = ({
   const getPages = () => {
     if (totalPages <= 5) {
       return Array.from(
-        { length: totalPages },
+        {
+          length: totalPages,
+        },
         (_, index) => index + 1
       );
     }
 
     if (currentPage <= 3) {
-      return [1, 2, 3, 4, "...", totalPages];
+      return [
+        1,
+        2,
+        3,
+        4,
+        "...",
+        totalPages,
+      ];
     }
 
-    if (currentPage >= totalPages - 2) {
+    if (
+      currentPage >=
+      totalPages - 2
+    ) {
       return [
         1,
         "...",
@@ -900,14 +1541,23 @@ const Pagination = ({
   return (
     <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-xs text-gray-500 sm:text-sm">
-        Page {currentPage} of {totalPages}
+        Page {currentPage} of{" "}
+        {totalPages}
       </p>
 
       <div className="flex items-center justify-center gap-1">
         <button
-          disabled={currentPage === 1}
+          disabled={
+            currentPage === 1
+          }
           onClick={() =>
-            setCurrentPage((prev) => Math.max(1, prev - 1))
+            setCurrentPage(
+              (prev) =>
+                Math.max(
+                  1,
+                  prev - 1
+                )
+            )
           }
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
@@ -915,35 +1565,48 @@ const Pagination = ({
         </button>
 
         <div className="flex items-center gap-1 overflow-x-auto">
-          {getPages().map((page, index) =>
-            page === "..." ? (
-              <span
-                key={`dots-${index}`}
-                className="flex h-9 w-7 items-center justify-center text-gray-400"
-              >
-                ...
-              </span>
-            ) : (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`h-9 min-w-9 rounded-lg px-2 text-sm font-medium transition ${
-                  currentPage === page
-                    ? "bg-[#DB4444] text-white"
-                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </button>
-            )
+          {getPages().map(
+            (page, index) =>
+              page === "..." ? (
+                <span
+                  key={`dots-${index}`}
+                  className="flex h-9 w-7 items-center justify-center text-gray-400"
+                >
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() =>
+                    setCurrentPage(
+                      page
+                    )
+                  }
+                  className={`h-9 min-w-9 rounded-lg px-2 text-sm font-medium transition ${
+                    currentPage ===
+                    page
+                      ? "bg-[#DB4444] text-white"
+                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
           )}
         </div>
 
         <button
-          disabled={currentPage === totalPages}
+          disabled={
+            currentPage ===
+            totalPages
+          }
           onClick={() =>
-            setCurrentPage((prev) =>
-              Math.min(totalPages, prev + 1)
+            setCurrentPage(
+              (prev) =>
+                Math.min(
+                  totalPages,
+                  prev + 1
+                )
             )
           }
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -955,9 +1618,9 @@ const Pagination = ({
   );
 };
 
-/* =========================
+/* =========================================================
    LOADING
-========================= */
+========================================================= */
 
 const LoadingState = () => {
   return (
@@ -973,15 +1636,20 @@ const LoadingState = () => {
   );
 };
 
-/* =========================
+/* =========================================================
    EMPTY STATE
-========================= */
+========================================================= */
 
-const EmptyState = ({ resetFilters }) => {
+const EmptyState = ({
+  resetFilters,
+}) => {
   return (
     <div className="flex min-h-[300px] flex-col items-center justify-center px-4 text-center">
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-        <FiPackage size={28} className="text-gray-400" />
+        <FiPackage
+          size={28}
+          className="text-gray-400"
+        />
       </div>
 
       <h3 className="text-lg font-semibold text-gray-800">
@@ -989,7 +1657,8 @@ const EmptyState = ({ resetFilters }) => {
       </h3>
 
       <p className="mt-1 max-w-md text-sm text-gray-500">
-        No orders match your current search or filter.
+        No orders match your current
+        search or filter.
       </p>
 
       <button
@@ -1002,9 +1671,9 @@ const EmptyState = ({ resetFilters }) => {
   );
 };
 
-/* =========================
+/* =========================================================
    ORDER DETAILS MODAL
-========================= */
+========================================================= */
 
 const OrderDetailsModal = ({
   order,
@@ -1012,30 +1681,48 @@ const OrderDetailsModal = ({
   onStatusChange,
   updatingStatus,
 }) => {
-  const orderId = getOrderId(order);
-  const status = getOrderStatus(order);
-  const items = getOrderItems(order);
+  const orderId =
+    getOrderId(order);
 
-  const [selectedStatus, setSelectedStatus] =
-    useState(status);
+  const status =
+    getOrderStatus(order);
+
+  const items =
+    getOrderItems(order);
+
+  const [
+    selectedStatus,
+    setSelectedStatus,
+  ] = useState(status);
 
   useEffect(() => {
     setSelectedStatus(status);
   }, [status]);
 
-  // Customer information
-  const customerName = getCustomerName(order);
-  const customerEmail = getCustomerEmail(order);
-  const customerPhone = getCustomerPhone(order);
+  /* Customer */
 
-  // Billing / Shipping address
-  const shippingAddress = [
-    order?.street_address,
-    order?.apartment,
-    order?.town_city,
-  ]
-    .filter(Boolean)
-    .join(", ") || "No shipping address available";
+  const customerName =
+    getCustomerName(order);
+
+  const customerEmail =
+    getCustomerEmail(order);
+
+  const customerPhone =
+    getCustomerPhone(order);
+
+  /* Address */
+
+  const shippingAddress =
+    [
+      order?.street_address,
+      order?.apartment,
+      order?.town_city,
+    ]
+      .filter(Boolean)
+      .join(", ") ||
+    "No shipping address available";
+
+  /* Payment */
 
   const paymentMethod =
     order?.payment_method ||
@@ -1043,7 +1730,10 @@ const OrderDetailsModal = ({
     order?.payment_type ||
     "N/A";
 
-  const total = getOrderTotal(order);
+  /* Amounts */
+
+  const total =
+    getOrderTotal(order);
 
   const subtotal = Number(
     order?.subtotal ??
@@ -1064,14 +1754,17 @@ const OrderDetailsModal = ({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-5"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) {
+        if (
+          e.target ===
+          e.currentTarget
+        ) {
           onClose();
         }
       }}
     >
       <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-
         {/* Modal Header */}
+
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4 sm:px-6">
           <div>
             <h2 className="text-lg font-bold text-gray-800 sm:text-xl">
@@ -1079,13 +1772,17 @@ const OrderDetailsModal = ({
             </h2>
 
             <p className="mt-1 text-xs text-gray-500">
-              {formatDateTime(getOrderDate(order))}
+              {formatDateTime(
+                getOrderDate(order)
+              )}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            disabled={updatingStatus}
+            disabled={
+              updatingStatus
+            }
             className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-gray-200 disabled:opacity-50"
           >
             <FiX />
@@ -1093,14 +1790,14 @@ const OrderDetailsModal = ({
         </div>
 
         {/* Modal Body */}
+
         <div className="overflow-y-auto p-4 sm:p-6">
-
           {/* Customer + Status */}
+
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-
             {/* Customer */}
-            <div className="rounded-xl border border-gray-200 p-4">
 
+            <div className="rounded-xl border border-gray-200 p-4">
               <div className="mb-4 flex items-center gap-2">
                 <FiUser className="text-[#DB4444]" />
 
@@ -1110,37 +1807,43 @@ const OrderDetailsModal = ({
               </div>
 
               <div className="space-y-3">
-
                 <InfoRow
                   icon={FiUser}
                   label="Name"
-                  value={customerName}
+                  value={
+                    customerName
+                  }
                 />
 
                 <InfoRow
                   icon={FiMail}
                   label="Email"
-                  value={customerEmail}
+                  value={
+                    customerEmail
+                  }
                 />
 
                 <InfoRow
                   icon={FiPhone}
                   label="Phone"
-                  value={customerPhone}
+                  value={
+                    customerPhone
+                  }
                 />
 
                 <InfoRow
                   icon={FiMapPin}
                   label="Address"
-                  value={shippingAddress}
+                  value={
+                    shippingAddress
+                  }
                 />
-
               </div>
             </div>
 
-            {/* Order Status */}
-            <div className="rounded-xl border border-gray-200 p-4">
+            {/* Status */}
 
+            <div className="rounded-xl border border-gray-200 p-4">
               <div className="mb-4 flex items-center gap-2">
                 <FiPackage className="text-[#DB4444]" />
 
@@ -1154,26 +1857,50 @@ const OrderDetailsModal = ({
               </label>
 
               <select
-                value={selectedStatus}
-                onChange={(e) =>
-                  setSelectedStatus(e.target.value)
+                value={
+                  selectedStatus
                 }
-                disabled={updatingStatus}
+                onChange={(e) =>
+                  setSelectedStatus(
+                    e.target.value
+                  )
+                }
+                disabled={
+                  updatingStatus
+                }
                 className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm outline-none focus:border-[#DB4444] focus:bg-white"
               >
-                <option value="Pending">Pending</option>
-                <option value="Processing">Processing</option>
-                <option value="Shipped">Shipped</option>
-                <option value="Delivered">Delivered</option>
-                <option value="Cancelled">Cancelled</option>
+                <option value="Pending">
+                  Pending
+                </option>
+
+                <option value="Processing">
+                  Processing
+                </option>
+
+                <option value="Shipped">
+                  Shipped
+                </option>
+
+                <option value="Delivered">
+                  Delivered
+                </option>
+
+                <option value="Cancelled">
+                  Cancelled
+                </option>
               </select>
 
               <button
                 onClick={() =>
-                  onStatusChange(selectedStatus)
+                  onStatusChange(
+                    selectedStatus
+                  )
                 }
                 disabled={
-                  updatingStatus || selectedStatus === status
+                  updatingStatus ||
+                  selectedStatus ===
+                    status
                 }
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#DB4444] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#c93636] disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -1189,84 +1916,126 @@ const OrderDetailsModal = ({
           </div>
 
           {/* Products */}
-          <div className="mt-5 rounded-xl border border-gray-200">
 
+          <div className="mt-5 rounded-xl border border-gray-200">
             <div className="border-b border-gray-100 px-4 py-4">
               <h3 className="font-semibold text-gray-800">
                 Order Items
               </h3>
             </div>
 
-            {Array.isArray(items) && items.length > 0 ? (
+            {Array.isArray(
+              items
+            ) &&
+            items.length > 0 ? (
               <div className="divide-y divide-gray-100">
+                {items.map(
+                  (
+                    item,
+                    index
+                  ) => {
+                    const image =
+                      getProductImage(
+                        item
+                      );
 
-                {items.map((item, index) => {
-                  const image = getProductImage(item);
-                  const productName = getProductName(item);
-                  const quantity = getProductQuantity(item);
-                  const price = getProductPrice(item);
+                    const productName =
+                      getProductName(
+                        item
+                      );
 
-                  return (
-                    <div
-                      key={item?.id || index}
-                      className="flex items-center gap-3 p-4"
-                    >
+                    const quantity =
+                      getProductQuantity(
+                        item
+                      );
 
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
-                        {image ? (
-                          <img
-                            src={image}
-                            alt={productName}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <FiPackage
-                            className="text-gray-400"
-                            size={22}
-                          />
-                        )}
+                    const price =
+                      getProductPrice(
+                        item
+                      );
+
+                    return (
+                      <div
+                        key={
+                          item?.id ||
+                          index
+                        }
+                        className="flex items-center gap-3 p-4"
+                      >
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+                          {image ? (
+                            <img
+                              src={
+                                image
+                              }
+                              alt={
+                                productName
+                              }
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <FiPackage
+                              className="text-gray-400"
+                              size={
+                                22
+                              }
+                            />
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-gray-800">
+                            {
+                              productName
+                            }
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-500">
+                            Qty:{" "}
+                            {
+                              quantity
+                            }
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-gray-800">
+                            ৳{" "}
+                            {(
+                              price *
+                              quantity
+                            ).toFixed(
+                              2
+                            )}
+                          </p>
+
+                          <p className="text-xs text-gray-400">
+                            ৳{" "}
+                            {price.toFixed(
+                              2
+                            )}{" "}
+                            each
+                          </p>
+                        </div>
                       </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-gray-800">
-                          {productName}
-                        </p>
-
-                        <p className="mt-1 text-xs text-gray-500">
-                          Qty: {quantity}
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-
-                        <p className="text-sm font-semibold text-gray-800">
-                          ৳ {(price * quantity).toFixed(2)}
-                        </p>
-
-                        <p className="text-xs text-gray-400">
-                          ৳ {price.toFixed(2)} each
-                        </p>
-
-                      </div>
-
-                    </div>
-                  );
-                })}
-
+                    );
+                  }
+                )}
               </div>
             ) : (
               <div className="p-6 text-center text-sm text-gray-500">
-                No item details available.
+                No item details
+                available.
               </div>
             )}
           </div>
 
           {/* Payment + Summary */}
+
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-
             {/* Payment */}
-            <div className="rounded-xl border border-gray-200 p-4">
 
+            <div className="rounded-xl border border-gray-200 p-4">
               <div className="mb-4 flex items-center gap-2">
                 <FiCreditCard className="text-[#DB4444]" />
 
@@ -1276,14 +2045,15 @@ const OrderDetailsModal = ({
               </div>
 
               <div className="space-y-3 text-sm">
-
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-gray-500">
                     Payment Method
                   </span>
 
                   <span className="font-medium text-gray-800">
-                    {paymentMethod}
+                    {
+                      paymentMethod
+                    }
                   </span>
                 </div>
 
@@ -1298,13 +2068,12 @@ const OrderDetailsModal = ({
                       "N/A"}
                   </span>
                 </div>
-
               </div>
             </div>
 
             {/* Summary */}
-            <div className="rounded-xl border border-gray-200 p-4">
 
+            <div className="rounded-xl border border-gray-200 p-4">
               <div className="mb-4 flex items-center gap-2">
                 <FiCreditCard className="text-[#DB4444]" />
 
@@ -1314,93 +2083,102 @@ const OrderDetailsModal = ({
               </div>
 
               <div className="space-y-3 text-sm">
-
-                {/* Subtotal */}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">
                     Subtotal
                   </span>
 
                   <span className="font-medium text-gray-800">
-                    ৳ {subtotal.toFixed(2)}
+                    ৳{" "}
+                    {subtotal.toFixed(
+                      2
+                    )}
                   </span>
                 </div>
 
-                {/* Discount */}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">
                     Discount
                   </span>
 
                   <span className="font-medium text-green-600">
-                    - ৳ {discount.toFixed(2)}
+                    - ৳{" "}
+                    {discount.toFixed(
+                      2
+                    )}
                   </span>
                 </div>
 
-                {/* Shipping */}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">
                     Shipping
                   </span>
 
                   <span className="font-medium text-gray-800">
-                    ৳ {shippingCost.toFixed(2)}
+                    ৳{" "}
+                    {shippingCost.toFixed(
+                      2
+                    )}
                   </span>
                 </div>
 
                 <div className="border-t border-gray-100 pt-3">
-
                   <div className="flex items-center justify-between">
-
                     <span className="font-semibold text-gray-800">
                       Total
                     </span>
 
                     <span className="text-lg font-bold text-[#DB4444]">
-                      ৳ {total.toFixed(2)}
+                      ৳{" "}
+                      {total.toFixed(
+                        2
+                      )}
                     </span>
-
                   </div>
-
                 </div>
-
               </div>
             </div>
           </div>
 
           {/* Date */}
+
           <div className="mt-5 flex items-center gap-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-500">
             <FiCalendar />
 
             <span>
               Order placed on{" "}
               <span className="font-medium text-gray-700">
-                {formatDateTime(getOrderDate(order))}
+                {formatDateTime(
+                  getOrderDate(
+                    order
+                  )
+                )}
               </span>
             </span>
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <div className="border-t border-gray-300 px-4 py-3 sm:px-6">
+        {/* Footer */}
 
+        <div className="border-t border-gray-300 px-4 py-3 sm:px-6">
           <button
             onClick={onClose}
-            disabled={updatingStatus}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-bold text-red-500 transition bg-gray-100 hover:bg-gray-300"
+            disabled={
+              updatingStatus
+            }
+            className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm font-bold text-red-500 transition hover:bg-gray-300"
           >
             Close
           </button>
-
         </div>
       </div>
     </div>
   );
 };
 
-/* =========================
+/* =========================================================
    INFO ROW
-========================= */
+========================================================= */
 
 const InfoRow = ({
   icon: Icon,
@@ -1409,14 +2187,12 @@ const InfoRow = ({
 }) => {
   return (
     <div className="flex items-start gap-3">
-
       <Icon
         size={16}
         className="mt-0.5 shrink-0 text-gray-400"
       />
 
       <div className="min-w-0">
-
         <p className="text-xs text-gray-400">
           {label}
         </p>
@@ -1424,10 +2200,10 @@ const InfoRow = ({
         <p className="break-words text-sm font-medium text-gray-700">
           {value}
         </p>
-
       </div>
     </div>
   );
 };
 
 export default Orders;
+
