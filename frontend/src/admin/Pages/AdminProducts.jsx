@@ -41,6 +41,7 @@ const AdminProducts = () => {
 
   const [formData, setFormData] = useState({
     name: "",
+    description: "",
     category: "",
     price: "",
     stock: "",
@@ -89,13 +90,16 @@ const AdminProducts = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${BASEURL}/api/products/`, {
-        ...getAuthConfig(),
-        params: {
-          search: search || undefined,
-          page: currentPage,
-        },
-      });
+      const response = await axios.get(
+        `${BASEURL}/api/products/`,
+        {
+          ...getAuthConfig(),
+          params: {
+            search: search || undefined,
+            page: currentPage,
+          },
+        }
+      );
 
       const data = response.data;
 
@@ -167,8 +171,6 @@ const AdminProducts = () => {
       );
 
       if (error.response?.status === 401) {
-        // SAME toastId
-        // So login toast will show only once
         toast.error("Please login again.", {
           toastId: "admin-login-error",
         });
@@ -266,6 +268,7 @@ const AdminProducts = () => {
   const resetForm = () => {
     setFormData({
       name: "",
+      description: "",
       category: "",
       price: "",
       stock: "",
@@ -368,14 +371,23 @@ const AdminProducts = () => {
 
     setFormData({
       name: product.name || "",
+
+      // DESCRIPTION
+      description: product.description || "",
+
       category: categoryId,
+
       price: product.price ?? "",
+
       stock: product.stock ?? "",
+
       rating: product.rating ?? "0",
+
       available:
         product.available !== undefined
           ? product.available
           : true,
+
       image: null,
     });
 
@@ -395,6 +407,11 @@ const AdminProducts = () => {
 
     if (!formData.name.trim()) {
       toast.error("Product name is required.");
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      toast.error("Product description is required.");
       return;
     }
 
@@ -418,13 +435,28 @@ const AdminProducts = () => {
 
       const data = new FormData();
 
-      // Product name
+      // =================================================
+      // PRODUCT NAME
+      // =================================================
+
       data.append(
         "name",
         formData.name.trim()
       );
 
-      // Category
+      // =================================================
+      // PRODUCT DESCRIPTION
+      // =================================================
+
+      data.append(
+        "description",
+        formData.description.trim()
+      );
+
+      // =================================================
+      // CATEGORY
+      // =================================================
+
       data.append(
         "category_id",
         String(
@@ -434,31 +466,46 @@ const AdminProducts = () => {
         )
       );
 
-      // Price
+      // =================================================
+      // PRICE
+      // =================================================
+
       data.append(
         "price",
         String(formData.price)
       );
 
-      // Stock
+      // =================================================
+      // STOCK
+      // =================================================
+
       data.append(
         "stock",
         String(formData.stock)
       );
 
-      // Rating
+      // =================================================
+      // RATING
+      // =================================================
+
       data.append(
         "rating",
         String(formData.rating || 0)
       );
 
-      // Available
+      // =================================================
+      // AVAILABLE
+      // =================================================
+
       data.append(
         "available",
         String(formData.available)
       );
 
-      // Image
+      // =================================================
+      // IMAGE
+      // =================================================
+
       if (formData.image) {
         data.append(
           "image",
@@ -466,7 +513,10 @@ const AdminProducts = () => {
         );
       }
 
+      // =================================================
       // DEBUG
+      // =================================================
+
       console.log(
         "========== PRODUCT FORM DATA =========="
       );
@@ -525,13 +575,22 @@ const AdminProducts = () => {
         );
       }
 
-      // Close modal
+      // =================================================
+      // CLOSE MODAL
+      // =================================================
+
       setShowModal(false);
 
-      // Reset
+      // =================================================
+      // RESET FORM
+      // =================================================
+
       resetForm();
 
-      // Refresh products
+      // =================================================
+      // REFRESH PRODUCTS
+      // =================================================
+
       await fetchProducts();
 
     } catch (error) {
@@ -549,6 +608,22 @@ const AdminProducts = () => {
         error.response?.data;
 
       if (
+        backendError?.description
+      ) {
+        toast.error(
+          `Description: ${
+            Array.isArray(
+              backendError.description
+            )
+              ? backendError.description.join(
+                  ", "
+                )
+              : backendError.description
+          }`
+        );
+      }
+
+      else if (
         backendError?.category_id
       ) {
         toast.error(
@@ -635,6 +710,7 @@ const AdminProducts = () => {
         toast.error("Please login again.", {
           toastId: "admin-login-error",
         });
+
         return;
       }
 
@@ -678,42 +754,70 @@ const AdminProducts = () => {
         toast.error(
           "Category not found for this product."
         );
+
         return;
       }
 
       const data = new FormData();
 
-      // Product name
+      // =================================================
+      // PRODUCT NAME
+      // =================================================
+
       data.append(
         "name",
         `${product.name || "Product"} Copy`
       );
 
-      // Category
+      // =================================================
+      // DESCRIPTION
+      // =================================================
+
+      data.append(
+        "description",
+        product.description || ""
+      );
+
+      // =================================================
+      // CATEGORY
+      // =================================================
+
       data.append(
         "category_id",
         String(categoryId)
       );
 
-      // Price
+      // =================================================
+      // PRICE
+      // =================================================
+
       data.append(
         "price",
         String(product.price || 0)
       );
 
-      // Stock
+      // =================================================
+      // STOCK
+      // =================================================
+
       data.append(
         "stock",
         String(product.stock || 0)
       );
 
-      // Rating
+      // =================================================
+      // RATING
+      // =================================================
+
       data.append(
         "rating",
         String(product.rating || 0)
       );
 
-      // Available
+      // =================================================
+      // AVAILABLE
+      // =================================================
+
       data.append(
         "available",
         String(
@@ -830,6 +934,7 @@ const AdminProducts = () => {
         toast.error("Please login again.", {
           toastId: "admin-login-error",
         });
+
         return;
       }
 
@@ -837,6 +942,22 @@ const AdminProducts = () => {
         error.response?.data;
 
       if (
+        backendError?.description
+      ) {
+        toast.error(
+          `Description: ${
+            Array.isArray(
+              backendError.description
+            )
+              ? backendError.description.join(
+                  ", "
+                )
+              : backendError.description
+          }`
+        );
+      }
+
+      else if (
         backendError?.category_id
       ) {
         toast.error(
@@ -900,6 +1021,7 @@ const AdminProducts = () => {
     const headers = [
       "ID",
       "Product Name",
+      "Description",
       "Category",
       "Price",
       "Stock",
@@ -911,6 +1033,7 @@ const AdminProducts = () => {
         (product) => [
           product.id,
           product.name,
+          product.description || "",
           getCategoryName(
             product.category
           ),
@@ -1022,7 +1145,9 @@ const AdminProducts = () => {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
 
-      {/* HEADER */}
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
       <div className="mb-6 flex flex-col gap-2">
 
@@ -1036,7 +1161,9 @@ const AdminProducts = () => {
 
       </div>
 
-      {/* TOOLBAR */}
+      {/* =================================================
+          TOOLBAR
+      ================================================= */}
 
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 
@@ -1147,7 +1274,9 @@ const AdminProducts = () => {
 
       </div>
 
-      {/* TABLE */}
+      {/* =================================================
+          TABLE
+      ================================================= */}
 
       <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -1429,7 +1558,9 @@ const AdminProducts = () => {
 
         </div>
 
-        {/* PAGINATION */}
+        {/* =================================================
+            PAGINATION
+        ================================================= */}
 
         <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -1545,7 +1676,9 @@ const AdminProducts = () => {
 
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
 
-            {/* MODAL HEADER */}
+            {/* =================================================
+                MODAL HEADER
+            ================================================= */}
 
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
 
@@ -1584,7 +1717,9 @@ const AdminProducts = () => {
 
             </div>
 
-            {/* FORM */}
+            {/* =================================================
+                FORM
+            ================================================= */}
 
             <form
               onSubmit={
@@ -1593,7 +1728,9 @@ const AdminProducts = () => {
               className="space-y-5 p-6"
             >
 
-              {/* NAME */}
+              {/* =================================================
+                  NAME
+              ================================================= */}
 
               <div>
 
@@ -1616,7 +1753,34 @@ const AdminProducts = () => {
 
               </div>
 
-              {/* CATEGORY + PRICE */}
+              {/* =================================================
+                  DESCRIPTION
+              ================================================= */}
+
+              <div>
+
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Product Description
+                </label>
+
+                <textarea
+                  name="description"
+                  value={
+                    formData.description
+                  }
+                  onChange={
+                    handleInputChange
+                  }
+                  rows="4"
+                  placeholder="Enter product description"
+                  className="w-full resize-none rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+                />
+
+              </div>
+
+              {/* =================================================
+                  CATEGORY + PRICE
+              ================================================= */}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
@@ -1696,7 +1860,9 @@ const AdminProducts = () => {
 
               </div>
 
-              {/* STOCK + RATING */}
+              {/* =================================================
+                  STOCK + RATING
+              ================================================= */}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
@@ -1752,7 +1918,9 @@ const AdminProducts = () => {
 
               </div>
 
-              {/* IMAGE */}
+              {/* =================================================
+                  IMAGE
+              ================================================= */}
 
               <div>
 
@@ -1772,7 +1940,9 @@ const AdminProducts = () => {
 
               </div>
 
-              {/* AVAILABLE */}
+              {/* =================================================
+                  AVAILABLE
+              ================================================= */}
 
               <label className="flex cursor-pointer items-center gap-3">
 
@@ -1794,7 +1964,9 @@ const AdminProducts = () => {
 
               </label>
 
-              {/* BUTTONS */}
+              {/* =================================================
+                  BUTTONS
+              ================================================= */}
 
               <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
 

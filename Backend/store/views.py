@@ -1,6 +1,6 @@
 
 from datetime import timedelta
-
+from rest_framework.pagination import PageNumberPagination
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import (
@@ -77,7 +77,23 @@ def get_product(request):
                 products.filter(name__icontains=search)
                 | products.filter(description__icontains=search)
             )
-
+        # Pagination
+        paginator = PageNumberPagination()
+        # paginator.page_size = 20
+        
+        paginated_products = paginator.paginate_queryset(
+            products,
+            request
+        )
+        
+        serializer = ProductSerializer(
+            paginated_products,
+            many=True
+        )
+        
+        return paginator.get_paginated_response(
+            serializer.data
+        )
         serializer = ProductSerializer(products, many=True)
 
         return Response(serializer.data)
