@@ -93,7 +93,7 @@ const ProductList = () => {
   // PRODUCTS PER PAGE
   // ==========================================
 
-  const productsPerPage = 10;
+  const productsPerPage = 20;
 
   // ==========================================
   // TOTAL PAGES

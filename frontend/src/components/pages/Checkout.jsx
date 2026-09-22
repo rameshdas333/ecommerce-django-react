@@ -105,6 +105,7 @@ const Checkout = () => {
   
   // ================= PLACE ORDER =================
 // ================= PLACE ORDER =================
+// ================= PLACE ORDER =================
 const handlePlaceOrder = async (e) => {
   e.preventDefault();
 
@@ -170,8 +171,8 @@ const handlePlaceOrder = async (e) => {
     // Clear cart after successful order
     dispatch(clearCart());
 
-    // Go to orders/success page
-    navigate("/orders");
+    // Navigate to Product List page
+    navigate("/products");
 
   } catch (error) {
     console.error(
@@ -181,8 +182,10 @@ const handlePlaceOrder = async (e) => {
 
     if (error.response?.status === 401) {
       toast.error("Your login session has expired. Please login again.");
+
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+
       navigate("/login");
     } else {
       toast.error(

@@ -399,53 +399,13 @@ def remove_from_cart(request):
     )
 
 
+
 # =========================================================
 # ORDER VIEWSET
 # =========================================================
 
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-
-from .models import Order
-from .serializers import OrderSerializer
-
-
 class OrderViewSet(viewsets.ModelViewSet):
 
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-
-        user = self.request.user
-
-        if user.is_staff or user.is_superuser:
-
-            return (
-                Order.objects
-                .select_related("user")
-                .prefetch_related(
-                    "items__product"
-                )
-                .all()
-                .order_by("-created_at")
-            )
-
-        return (
-            Order.objects
-            .select_related("user")
-            .prefetch_related(
-                "items__product"
-            )
-            .filter(user=user)
-            .order_by("-created_at")
-        )
-
-    def perform_create(self, serializer):
-
-        # Serializer-এর create() already
-        # request.user ব্যবহার করছে.
-        serializer.save()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -456,17 +416,26 @@ class OrderViewSet(viewsets.ModelViewSet):
         print("USER ID:", user.id)
         print("IS STAFF:", user.is_staff)
 
-        if user.is_staff:
-            return Order.objects.all().order_by("-created_at")
+        if user.is_staff or user.is_superuser:
+            return (
+                Order.objects
+                .select_related("user")
+                .prefetch_related("items__product")
+                .all()
+                .order_by("-created_at")
+            )
 
-        return Order.objects.filter(
-            user=user
-        ).order_by("-created_at")
+        return (
+            Order.objects
+            .select_related("user")
+            .prefetch_related("items__product")
+            .filter(user=user)
+            .order_by("-created_at")
+        )
 
     def perform_create(self, serializer):
-        serializer.save(
-            user=self.request.user
-        )
+        # OrderSerializer.create() already handles request.user
+        serializer.save()
 
 # =========================================================
 # CUSTOMER LIST
