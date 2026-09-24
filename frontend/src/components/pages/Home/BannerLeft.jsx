@@ -25,63 +25,63 @@ const BannerLeft = () => {
       "
     >
       <Link
-        to="/category/womens-fashion"
+        to="/products?category=womens-fashion"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Woman’s Fashion
       </Link>
 
       <Link
-        to="/category/mens-fashion"
+        to="/products?category=mens-fashion"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Men’s Fashion
       </Link>
 
       <Link
-        to="/category/electronics"
+        to="/products?category=electronics"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Electronics
       </Link>
 
       <Link
-        to="/category/home-lifestyle"
+        to="/products?category=home-lifestyle"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Home & Lifestyle
       </Link>
 
       <Link
-        to="/category/medicine"
+        to="/products?category=medicine"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Medicine
       </Link>
 
       <Link
-        to="/category/sports-outdoor"
+        to="/products?category=sports-outdoor"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Sports & Outdoor
       </Link>
 
       <Link
-        to="/category/babys-toys"
+        to="/products?category=babys-toys"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Baby’s & Toys
       </Link>
 
       <Link
-        to="/category/groceries-pets"
+        to="/products?category=groceries-pets"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Groceries & Pets
       </Link>
 
       <Link
-        to="/category/health-beauty"
+        to="/products?category=health-beauty"
         className="block py-2 text-sm sm:text-base md:text-base hover:text-[#DB4444] transition"
       >
         Health & Beauty

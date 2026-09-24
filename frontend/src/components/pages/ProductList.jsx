@@ -24,6 +24,7 @@ const ProductList = () => {
 
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
+  const category = searchParams.get("category") || "";
 
   const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
 
@@ -45,14 +46,19 @@ const ProductList = () => {
         setLoading(true);
         setError(null);
 
-        let url = `${BASEURL}/api/products/?page=${currentPage}`;
+        const params = new URLSearchParams();
 
-        // Search thakle search + pagination
+        params.append("page", currentPage);
+
         if (search) {
-          url = `${BASEURL}/api/products/?search=${encodeURIComponent(
-            search
-          )}&page=${currentPage}`;
+          params.append("search", search);
         }
+
+        if (category) {
+          params.append("category", category);
+        }
+
+        const url = `${BASEURL}/api/products/?${params.toString()}`;
 
         console.log("API URL:", url);
 

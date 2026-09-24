@@ -98,39 +98,67 @@ def get_product(request):
 
     if request.method == "GET":
 
-        products = Product.objects.all().order_by("-id")
+     products = Product.objects.all().order_by("-id")
 
-        search = request.GET.get("search")
+    # =========================
+    # SEARCH
+    # =========================
 
-        if search:
-            products = (
-                products.filter(
-                    Q(name__icontains=search)
-                    | Q(description__icontains=search)
-                )
+    search = request.GET.get("search")
+
+    if search:
+        products = products.filter(
+            Q(name__icontains=search)
+            | Q(description__icontains=search)
+        )
+
+    # =========================
+    # CATEGORY FILTER
+    # =========================
+
+    category = request.GET.get("category")
+
+    if category:
+        category_map = {
+            "womens-fashion": "Woman's Fashion",
+            "mens-fashion": "Men's Fashion",
+            "electronics": "Electronics",
+            "home-lifestyle": "Home & Lifestyle",
+            "medicine": "Medicine",
+            "sports-outdoor": "Sports & Outdoor",
+            "babys-toys": "Baby's & Toys",
+            "groceries-pets": "Groceries & Pets",
+            "health-beauty": "Health & Beauty",
+        }
+
+        category_name = category_map.get(category)
+
+        if category_name:
+            products = products.filter(
+                category__name__iexact=category_name
             )
 
-        # =================================================
-        # PAGINATION - 20 PRODUCTS PER PAGE
-        # =================================================
+    # =========================
+    # PAGINATION
+    # =========================
 
-        paginator = PageNumberPagination()
-        paginator.page_size = 20
+    paginator = PageNumberPagination()
+    paginator.page_size = 20
 
-        paginated_products = paginator.paginate_queryset(
-            products,
-            request
-        )
+    paginated_products = paginator.paginate_queryset(
+        products,
+        request
+    )
 
-        serializer = ProductSerializer(
-            paginated_products,
-            many=True
-        )
+    serializer = ProductSerializer(
+        paginated_products,
+        many=True
+    )
 
-        return paginator.get_paginated_response(
-            serializer.data
-        )
-
+    return paginator.get_paginated_response(
+        serializer.data
+    )
+       
     # =====================================================
     # POST - Admin Only
     # =====================================================
