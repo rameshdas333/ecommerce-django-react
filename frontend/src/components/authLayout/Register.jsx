@@ -222,58 +222,67 @@ const Register = () => {
   // =========================
   // NORMAL REGISTER
   // =========================
-  const handleRegister = async (e) => {
-    e.preventDefault();
+const handleRegister = async (e) => {
+  e.preventDefault();
 
-    // Password minimum 6 characters
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters!");
-      return;
-    }
+  // Gmail only validation
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
-    // Strong password validation
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#!,./])[A-Za-z\d@#!,./]{6,}$/;
+  if (!gmailRegex.test(email)) {
+    toast.error("Please enter a valid Gmail address!");
+    return;
+  }
 
-    if (!passwordRegex.test(password)) {
-      toast.error(
-        "Password must contain uppercase, lowercase, number and special character!"
-      );
-      return;
-    }
+  // Password minimum 6 characters
+  if (password.length < 6) {
+    toast.error("Password must be at least 6 characters!");
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/register/",
-        {
-          name: name,
-          email: email,
-          password: password,
-        }
-      );
+  // Strong password validation
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#!,./])[A-Za-z\d@#!,./]{6,}$/;
 
-      console.log("REGISTER SUCCESS:", response.data);
+  if (!passwordRegex.test(password)) {
+    toast.error(
+      "Password must contain uppercase, lowercase, number and special character!"
+    );
+    return;
+  }
 
-      toast.success("Registration successful!");
-
-      navigate("/login");
-    } catch (error) {
-      console.error("REGISTER ERROR:", error);
-
-      if (error.response) {
-        console.log("STATUS:", error.response.status);
-        console.log("DATA:", error.response.data);
-
-        toast.error(
-          error.response.data?.detail ||
-            JSON.stringify(error.response.data) ||
-            "Registration failed!"
-        );
-      } else {
-        toast.error("Server connection failed: " + error.message);
+  // API call
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/auth/register/",
+      {
+        name: name,
+        email: email,
+        password: password,
       }
+    );
+
+    console.log("REGISTER SUCCESS:", response.data);
+
+    toast.success("Registration successful!");
+
+    navigate("/login");
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
+    if (error.response) {
+      console.log("STATUS:", error.response.status);
+      console.log("DATA:", error.response.data);
+
+      toast.error(
+        error.response.data?.detail ||
+          JSON.stringify(error.response.data) ||
+          "Registration failed!"
+      );
+    } else {
+      toast.error("Server connection failed: " + error.message);
     }
-  };
+  }
+};
 
   // =========================
   // GOOGLE REGISTER
