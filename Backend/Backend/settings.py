@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jvwn+s7e+5q1ossk85n2)*@-2dt$92oh+5k^-)rwbybxt42r^5'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG",cast=bool)
+AGE = config("AGE",cast = int)
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
       "localhost",
@@ -121,20 +124,15 @@ import os
 import dj_database_url
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Default: use DATABASE_URL if available (Render/PostgreSQL)
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+
 
 # Fallback: local PostgreSQL for development
-if not os.environ.get("DATABASE_URL"):
-    DATABASES = {
+
+DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'ecommerce',          # local DB 
@@ -146,6 +144,7 @@ if not os.environ.get("DATABASE_URL"):
     }
 
 
+DATABASE_URL = config("DATABASE_URL")
 
 
 
@@ -167,6 +166,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+
 
 
 # Internationalization
