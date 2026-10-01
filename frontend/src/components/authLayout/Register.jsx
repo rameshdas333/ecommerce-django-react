@@ -8,7 +8,8 @@ import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 
 const BASEURL = (
-  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000"
+  import.meta.env.VITE_DJANGO_BASE_URL ||
+  "http://127.0.0.1:8000"
 ).replace(/\/$/, "");
 
 const Register = () => {
@@ -41,7 +42,7 @@ const Register = () => {
     // Gmail only validation
     const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
-    if (!gmailRegex.test(email)) {
+    if (!gmailRegex.test(email.trim())) {
       toast.error("Please enter a valid Gmail address!");
       return;
     }
@@ -69,7 +70,7 @@ const Register = () => {
         `${BASEURL}/api/auth/register/`,
         {
           name: cleanName,
-          email: email,
+          email: email.trim(),
           password: password,
         }
       );
@@ -77,7 +78,6 @@ const Register = () => {
       console.log("REGISTER SUCCESS:", response.data);
 
       toast.success("Registration successful!");
-
       navigate("/login");
     } catch (error) {
       console.error("REGISTER ERROR:", error);
@@ -127,7 +127,6 @@ const Register = () => {
       navigate("/login");
     } catch (error) {
       console.error("GOOGLE REGISTER ERROR:", error);
-
       console.log("GOOGLE ERROR RESPONSE:", error.response?.data);
 
       toast.error(
@@ -144,7 +143,6 @@ const Register = () => {
 
   return (
     <div className="w-full">
-
       {/* TITLE */}
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-800">
         Create an account
@@ -155,7 +153,6 @@ const Register = () => {
       </p>
 
       <form onSubmit={handleRegister} className="w-full">
-
         {/* NAME */}
         <div className="mb-5 sm:mb-6">
           <input
@@ -234,7 +231,6 @@ const Register = () => {
 
         {/* GOOGLE BUTTON */}
         <div className="relative mt-4">
-
           {/* YOUR ORIGINAL BUTTON */}
           <button
             type="button"
@@ -247,7 +243,6 @@ const Register = () => {
             "
           >
             <FcGoogle className="text-xl sm:text-2xl" />
-
             <span>Sign up with Google</span>
           </button>
 
@@ -265,14 +260,12 @@ const Register = () => {
               width="100%"
             />
           </div>
-
         </div>
       </form>
 
       {/* LOGIN LINK */}
       <p className="text-center text-sm sm:text-base text-gray-600 mt-6">
         Already have account?{" "}
-
         <Link
           to="/login"
           className="text-blue-400 underline underline-offset-4"
@@ -280,9 +273,9 @@ const Register = () => {
           Login
         </Link>
       </p>
-
     </div>
   );
 };
 
 export default Register;
+
