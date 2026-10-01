@@ -15,7 +15,6 @@ const BASEURL = (
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
-  // Backend data states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +28,7 @@ const Register = () => {
     e.preventDefault();
 
     const cleanName = name.trim();
+    const cleanEmail = email.trim();
 
     // Full name validation
     // Example: Ramesh Das
@@ -42,7 +42,7 @@ const Register = () => {
     // Gmail only validation
     const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
-    if (!gmailRegex.test(email.trim())) {
+    if (!gmailRegex.test(cleanEmail)) {
       toast.error("Please enter a valid Gmail address!");
       return;
     }
@@ -70,7 +70,7 @@ const Register = () => {
         `${BASEURL}/api/auth/register/`,
         {
           name: cleanName,
-          email: email.trim(),
+          email: cleanEmail,
           password: password,
         }
       );
@@ -118,7 +118,6 @@ const Register = () => {
 
       console.log("GOOGLE REGISTER SUCCESS:", response.data);
 
-      // Save JWT tokens
       localStorage.setItem("accessToken", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);
 
@@ -127,7 +126,6 @@ const Register = () => {
       navigate("/login");
     } catch (error) {
       console.error("GOOGLE REGISTER ERROR:", error);
-      console.log("GOOGLE ERROR RESPONSE:", error.response?.data);
 
       toast.error(
         error.response?.data?.detail ||
@@ -231,7 +229,6 @@ const Register = () => {
 
         {/* GOOGLE BUTTON */}
         <div className="relative mt-4">
-          {/* YOUR ORIGINAL BUTTON */}
           <button
             type="button"
             className="
