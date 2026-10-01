@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
@@ -73,12 +72,14 @@ const AdminSidebar = ({
 
         const data = response.data || {};
 
-        console.log("SIDEBAR LOGO API:", data.sidebar_logo);
+        console.log(
+          "SIDEBAR LOGO API:",
+          data.sidebar_logo
+        );
 
         if (data.sidebar_logo) {
           updateSidebarLogo(data.sidebar_logo);
 
-          // Save backend path
           localStorage.setItem(
             "sidebarLogo",
             data.sidebar_logo
@@ -98,7 +99,8 @@ const AdminSidebar = ({
     // =====================================================
     // FIRST LOAD FROM LOCAL STORAGE
     // =====================================================
-    const savedLogo = localStorage.getItem("sidebarLogo");
+    const savedLogo =
+      localStorage.getItem("sidebarLogo");
 
     if (savedLogo) {
       updateSidebarLogo(savedLogo);
@@ -149,49 +151,48 @@ const AdminSidebar = ({
   // =====================================================
   // MENU
   // =====================================================
-
- const menuItems = [
-  {
-    label: "Dashboard",
-    path: "/admin",
-  },
-  {
-    label: "Analytics",
-    path: "/admin/analytics",
-  },
-  {
-    label: "Products",
-    path: "/admin/products",
-  },
-  {
-    label: "categories",
-    path: "/admin/categories",
-  },
-  {
-    label: "Inventory",
-    path: "/admin/inventory",
-  },
-  {
-    label: "Orders",
-    path: "/admin/orders",
-  },
-  {
-    label: "Sales",
-    path: "/admin/sales",
-  },
-  {
-    label: "Customers",
-    path: "/admin/customers",
-  },
-  {
-    label: "Newsletter",
-    path: "/admin/newsletter",
-  },
-  {
-    label: "Settings",
-    path: "/admin/settings",
-  },
-];
+  const menuItems = [
+    {
+      label: "Dashboard",
+      path: "/admin/dashboard",
+    },
+    {
+      label: "Analytics",
+      path: "/admin/analytics",
+    },
+    {
+      label: "Products",
+      path: "/admin/products",
+    },
+    {
+      label: "categories",
+      path: "/admin/categories",
+    },
+    {
+      label: "Inventory",
+      path: "/admin/inventory",
+    },
+    {
+      label: "Orders",
+      path: "/admin/orders",
+    },
+    {
+      label: "Sales",
+      path: "/admin/sales",
+    },
+    {
+      label: "Customers",
+      path: "/admin/customers",
+    },
+    {
+      label: "Newsletter",
+      path: "/admin/newsletter",
+    },
+    {
+      label: "Settings",
+      path: "/admin/settings",
+    },
+  ];
 
   return (
     <>
@@ -237,7 +238,7 @@ const AdminSidebar = ({
             <img
               src={sidebarLogo || logo}
               alt="Sidebar Logo"
-              className="w-full h-full object-contain rounded-xl! "
+              className="w-full h-full object-contain rounded-xl!"
               onError={(e) => {
                 console.error(
                   "Sidebar logo failed:",
@@ -258,7 +259,7 @@ const AdminSidebar = ({
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === "/admin"}
+              end={item.path === "/admin/dashboard"}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 `
@@ -289,4 +290,3 @@ const AdminSidebar = ({
 };
 
 export default AdminSidebar;
-

@@ -30,6 +30,8 @@ import Customers from "./admin/Pages/Customers.jsx";
 import Newsletter from "./admin/Pages/Newsletter.jsx";
 import Settings from "./admin/Pages/Settings.jsx";
 import Categories from "./admin/Pages/AdminCategory.jsx";
+import AdminLogin from "./admin/Pages/adminLogin.jsx";
+import ProtectedAdminRoute from "./admin/Pages/ProtectedAdminRoute.jsx";
 
 
 
@@ -121,74 +123,83 @@ const router = createBrowserRouter([
   // ADMIN DASHBOARD
   // =====================================================
 
-  {
-    path: "/admin",
-    element: <AdminLayout />,
-    errorElement: <ErrorPage />,
+ // =====================================================
+// ADMIN LOGIN
+// =====================================================
 
-    children: [
+{
+  path: "/admin",
+  element: <AdminLogin/>,
+  errorElement: <ErrorPage />,
+},
 
-      // Dashboard
-      {
-        index: true,
-        element: <AdminDashboard />,
-      },
+// =====================================================
+// PROTECTED ADMIN DASHBOARD
+// =====================================================
 
-      // Analytics
-      {
-        path: "analytics",
-        element: <Analytics />,
-      },
+{
+  element: <ProtectedAdminRoute />,
+  children: [
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      errorElement: <ErrorPage />,
 
-      {
-        path: "categories",
-        element: <Categories/>
+      children: [
+        {
+          index: true,
+          path: "dashboard",
+          element: <AdminDashboard />,
+        },
 
-      },
+        {
+          path: "analytics",
+          element: <Analytics />,
+        },
 
-      // Products
-      {
-        path: "products",
-        element: <AdminProducts />,
-      },
+        {
+          path: "categories",
+          element: <Categories />,
+        },
 
-      // Inventory
-      {
-        path: "inventory",
-        element: <Inventory />,
-      },
+        {
+          path: "products",
+          element: <AdminProducts />,
+        },
 
-      // Orders
-      {
-        path: "orders",
-        element: <Orders />,
-      },
+        {
+          path: "inventory",
+          element: <Inventory />,
+        },
 
-      // Sales
-      {
-        path: "sales",
-        element: <Sales />,
-      },
+        {
+          path: "orders",
+          element: <Orders />,
+        },
 
-      // Customers
-      {
-        path: "customers",
-        element: <Customers />,
-      },
+        {
+          path: "sales",
+          element: <Sales />,
+        },
 
-      // Newsletter
-      {
-        path: "newsletter",
-        element: <Newsletter />,
-      },
+        {
+          path: "customers",
+          element: <Customers />,
+        },
 
-      // Settings
-      {
-        path: "settings",
-        element: <Settings />,
-      },
-    ],
-  },
+        {
+          path: "newsletter",
+          element: <Newsletter />,
+        },
+
+        {
+          path: "settings",
+          element: <Settings />,
+        },
+      ],
+    },
+  ],
+},
 
 ]);
 
