@@ -12,10 +12,14 @@ import Banner from './Banner.jsx';
 
 
 
+const BASEURL = (
+  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
 const Home = () => {
   const [message, setMessage] = useState('');
   useEffect(() => {
-    fetch('http://localhost:8000/api/')
+    fetch(`${BASEURL}/api/`)
       .then(response => response.json())
       .then(data => setMessage(data.message))
       .catch(error => console.error('Error fetching data:', error));

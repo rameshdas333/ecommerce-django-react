@@ -9,6 +9,10 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/slices/authSlice.js";
 
+const BASEURL = (
+  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -48,7 +52,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login/",
+        `${BASEURL}/api/auth/login/`,
         {
           email,
           password,
@@ -94,7 +98,7 @@ const Login = () => {
       console.log("GOOGLE CREDENTIAL RECEIVED");
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/google/",
+        `${BASEURL}/api/auth/google/`,
         {
           credential: credentialResponse.credential,
         }
