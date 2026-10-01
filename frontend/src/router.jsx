@@ -30,7 +30,7 @@ import Customers from "./admin/Pages/Customers.jsx";
 import Newsletter from "./admin/Pages/Newsletter.jsx";
 import Settings from "./admin/Pages/Settings.jsx";
 import Categories from "./admin/Pages/AdminCategory.jsx";
-import AdminLogin from "./admin/Pages/adminLogin.jsx";
+import AdminLogin from "./admin/Pages/AdminLogin.jsx";
 import ProtectedAdminRoute from "./admin/Pages/ProtectedAdminRoute.jsx";
 
 
