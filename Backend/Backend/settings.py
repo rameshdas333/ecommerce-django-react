@@ -77,6 +77,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -108,43 +109,26 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'ecommerce',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres123',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-
-import os
 import dj_database_url
-from pathlib import Path
 
+# Uses DATABASE_URL on Render; falls back to local Postgres for development
+DATABASE_URL = config("DATABASE_URL", default="")
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Default: use DATABASE_URL if available (Render/PostgreSQL)
-
-
-# Fallback: local PostgreSQL for development
-
-DATABASES = {
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    }
+else:
+    DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'ecommerce',          # local DB 
+            'NAME': 'ecommerce',          # local DB
             'USER': 'postgres',           # local user
             'PASSWORD': 'postgres123',    # local password
             'HOST': 'localhost',
             'PORT': '5432',
         }
     }
-
-
-DATABASE_URL = config("DATABASE_URL")
 
 
 
@@ -193,8 +177,24 @@ CORS_ALLOWED_ORIGINS = [
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 GOOGLE_CLIENT_ID = "453299031822-tcsu6vhan0t6o9dv66k0etrh860c8cp0.apps.googleusercontent.com"
-# STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://ecommerce-django-react-gules.vercel.app",
+    "https://*.onrender.com",
+]

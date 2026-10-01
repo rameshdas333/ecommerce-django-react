@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const BASEURL = (
+  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
 const ForgotPassword = () => {
 const [email, setEmail] = useState("");
 const navigate = useNavigate();
@@ -13,7 +17,7 @@ e.preventDefault();
 
 try {
   const response = await axios.post(
-    "http://127.0.0.1:8000/api/auth/forgot-password/",
+    `${BASEURL}/api/auth/forgot-password/`,
     { email }
   );
 

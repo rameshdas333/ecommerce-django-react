@@ -3,6 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const BASEURL = (
+  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
 const ResetPassword = () => {
 const { uid, token } = useParams();
 
@@ -29,7 +33,7 @@ if (newPassword !== confirmPassword) {
 
 try {
   const response = await axios.post(
-    "http://127.0.0.1:8000/api/auth/reset-password/",
+    `${BASEURL}/api/auth/reset-password/`,
     {
       uid: uid,
       token: token,

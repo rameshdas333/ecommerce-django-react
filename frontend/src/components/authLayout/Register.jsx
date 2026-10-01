@@ -43,7 +43,7 @@
 //   //  API call 
 //   try {
 //     const response = await axios.post(
-//       "http://127.0.0.1:8000/api/auth/register/",
+//       `${BASEURL}/api/auth/register/`,
 //       {
 //         name: name,
 //         email: email,
@@ -209,6 +209,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 
+const BASEURL = (
+  import.meta.env.VITE_DJANGO_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -253,7 +257,7 @@ const handleRegister = async (e) => {
   // API call
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/auth/register/",
+      `${BASEURL}/api/auth/register/`,
       {
         name: name,
         email: email,
@@ -297,7 +301,7 @@ const handleRegister = async (e) => {
       }
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/google/",
+        `${BASEURL}/api/auth/google/`,
         {
           credential: credentialResponse.credential,
         }
