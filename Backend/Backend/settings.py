@@ -178,15 +178,20 @@ CORS_ALLOWED_ORIGINS = [
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
 MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 GOOGLE_CLIENT_ID = "453299031822-tcsu6vhan0t6o9dv66k0etrh860c8cp0.apps.googleusercontent.com"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
