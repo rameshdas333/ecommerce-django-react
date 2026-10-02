@@ -26,7 +26,10 @@ const ProductList = () => {
   const search = searchParams.get("search") || "";
   const category = searchParams.get("category") || "";
 
-  const BASEURL = import.meta.env.VITE_DJANGO_BASE_URL;
+ const BASEURL = (
+  import.meta.env.VITE_DJANGO_BASE_URL ||
+  "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
   // ==========================================
   // SEARCH CHANGE HOLE PAGE 1 E JABE
