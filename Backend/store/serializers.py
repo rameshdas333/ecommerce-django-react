@@ -1,6 +1,8 @@
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.db import transaction
 
 from .models import (
     Cart,
@@ -363,13 +365,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        # Get order items
+        # =================================================
+        # GET ORDER ITEMS
+        # =================================================
+
         items_data = validated_data.pop(
             "items",
             []
         )
 
-        # Get logged-in user
+        # =================================================
+        # GET LOGGED-IN USER
+        # =================================================
+
         request = self.context.get(
             "request"
         )
@@ -379,37 +387,119 @@ class OrderSerializer(serializers.ModelSerializer):
                 "Request context is missing."
             )
 
-        # Create order
-        order = Order.objects.create(
-            user=request.user,
-            **validated_data
-        )
+        # =================================================
+        # ATOMIC TRANSACTION
+        # =================================================
 
-        # Create order items
-        for item_data in items_data:
+        with transaction.atomic():
 
-            product = item_data.get(
-                "product"
+            # =============================================
+            # CREATE ORDER
+            # =============================================
+
+            order = Order.objects.create(
+                user=request.user,
+                **validated_data
             )
 
-            if not product:
-                continue
+            # =============================================
+            # CREATE ORDER ITEMS + DECREASE STOCK
+            # =============================================
 
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=item_data.get(
+            for item_data in items_data:
+
+                product = item_data.get(
+                    "product"
+                )
+
+                if not product:
+                    continue
+
+                quantity = item_data.get(
                     "quantity",
                     1
-                ),
-                price=product.price,
-                selected_size=item_data.get(
-                    "selected_size",
-                    ""
-                ),
-            )
+                )
 
-        return order
+                # =========================================
+                # VALIDATE QUANTITY
+                # =========================================
+
+                if quantity <= 0:
+
+                    raise serializers.ValidationError(
+                        {
+                            "items": (
+                                f"Invalid quantity for "
+                                f"{product.name}."
+                            )
+                        }
+                    )
+
+                # =========================================
+                # LOCK PRODUCT ROW
+                # =========================================
+
+                product = (
+                    Product.objects
+                    .select_for_update()
+                    .get(pk=product.pk)
+                )
+
+                # =========================================
+                # CHECK STOCK
+                # =========================================
+
+                if product.stock < quantity:
+
+                    raise serializers.ValidationError(
+                        {
+                            "items": (
+                                f"Only {product.stock} "
+                                f"unit(s) of "
+                                f"{product.name} "
+                                f"are available."
+                            )
+                        }
+                    )
+
+                # =========================================
+                # CREATE ORDER ITEM
+                # =========================================
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=quantity,
+                    price=product.price,
+                    selected_size=item_data.get(
+                        "selected_size",
+                        ""
+                    ),
+                )
+
+                # =========================================
+                # DECREASE STOCK
+                # =========================================
+
+                product.stock -= quantity
+
+                # =========================================
+                # UPDATE AVAILABLE STATUS
+                # =========================================
+
+                if product.stock == 0:
+                    product.available = False
+                else:
+                    product.available = True
+
+                product.save(
+                    update_fields=[
+                        "stock",
+                        "available",
+                    ]
+                )
+
+            return order
 
 
 # =========================================================
@@ -665,3 +755,4 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             "id",
             "updated_at",
         ]
+
