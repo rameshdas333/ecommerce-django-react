@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'cloudinary_storage',
-    'django.contrib.staticfiles',
     'cloudinary',
 ]
 

@@ -98,69 +98,69 @@ def get_product(request):
 
     if request.method == "GET":
 
-     products = Product.objects.all().order_by("-id")
+        products = Product.objects.all().order_by("-id")
 
-    # =========================
-    # SEARCH
-    # =========================
+        # =========================
+        # SEARCH
+        # =========================
 
-    search = request.GET.get("search")
+        search = request.GET.get("search")
 
-    if search:
-        products = products.filter(
-            Q(name__icontains=search)
-            | Q(description__icontains=search)
-        )
-
-    # =========================
-    # CATEGORY FILTER
-    # =========================
-
-    category = request.GET.get("category")
-
-    if category:
-        category_map = {
-            "womens-fashion": "Woman's Fashion",
-            "mens-fashion": "Men's Fashion",
-            "electronics": "Electronics",
-            "home-lifestyle": "Home & Lifestyle",
-            "medicine": "Medicine",
-            "sports-outdoor": "Sports & Outdoor",
-            "babys-toys": "Baby's & Toys",
-            "groceries-pets": "Groceries & Pets",
-            "health-beauty": "Health & Beauty",
-        }
-
-        category_name = category_map.get(category)
-
-        if category_name:
+        if search:
             products = products.filter(
-                category__name__iexact=category_name
+                Q(name__icontains=search)
+                | Q(description__icontains=search)
             )
 
-    # =========================
-    # PAGINATION
-    # =========================
+        # =========================
+        # CATEGORY FILTER
+        # =========================
 
-    paginator = PageNumberPagination()
-    paginator.page_size = 20
+        category = request.GET.get("category")
 
-    paginated_products = paginator.paginate_queryset(
-        products,
-        request
-    )
+        if category:
+            category_map = {
+                "womens-fashion": "Woman's Fashion",
+                "mens-fashion": "Men's Fashion",
+                "electronics": "Electronics",
+                "home-lifestyle": "Home & Lifestyle",
+                "medicine": "Medicine",
+                "sports-outdoor": "Sports & Outdoor",
+                "babys-toys": "Baby's & Toys",
+                "groceries-pets": "Groceries & Pets",
+                "health-beauty": "Health & Beauty",
+            }
 
-    serializer = ProductSerializer(
-        paginated_products,
-        many=True
-    )
+            category_name = category_map.get(category)
 
-    return paginator.get_paginated_response(
-        serializer.data
-    )
-       
+            if category_name:
+                products = products.filter(
+                    category__name__iexact=category_name
+                )
+
+        # =========================
+        # PAGINATION
+        # =========================
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+
+        paginated_products = paginator.paginate_queryset(
+            products,
+            request
+        )
+
+        serializer = ProductSerializer(
+            paginated_products,
+            many=True
+        )
+
+        return paginator.get_paginated_response(
+            serializer.data
+        )
+
     # =====================================================
-    # POST - Admin Only
+    # POST - Create Product
     # =====================================================
 
     if request.method == "POST":
@@ -183,6 +183,14 @@ def get_product(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # =====================================================
+    # OTHER METHODS
+    # =====================================================
+
+    return Response(
+        {"detail": "Method not allowed."},
+        status=status.HTTP_405_METHOD_NOT_ALLOWED,
+    )exit
 # =========================================================
 # SINGLE PRODUCT DETAILS
 # =========================================================
