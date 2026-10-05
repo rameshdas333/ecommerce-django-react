@@ -73,9 +73,7 @@ class SizeSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
 
-    category = CategorySerializer(
-        read_only=True
-    )
+    category = CategorySerializer(read_only=True)
 
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
@@ -83,6 +81,11 @@ class ProductSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
         allow_null=True,
+    )
+
+    image = serializers.ImageField(
+        required=False,
+        allow_null=True
     )
 
     sizes = SizeSerializer(
@@ -116,16 +119,11 @@ class ProductSerializer(serializers.ModelSerializer):
             validated_data["slug"] = slugify(name)
 
         for attr, value in validated_data.items():
-            setattr(
-                instance,
-                attr,
-                value
-            )
+            setattr(instance, attr, value)
 
         instance.save()
 
         return instance
-
 
 # =========================================================
 # CART ITEM SERIALIZER
