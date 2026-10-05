@@ -187,10 +187,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        # CompressedManifest-এর বদলে এটি ব্যবহার করলে ফাইল মিসিং এর কারণে অ্যাপ ক্র্যাশ করবে না
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
@@ -216,8 +215,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://ecommerce-backend-s99l.onrender.com",
 ]
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'your_cloud_name',
-    'API_KEY': 'your_api_key',
-    'API_SECRET': 'your_api_secret'
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": config("CLOUDINARY_API_KEY"),
+    "API_SECRET": config("CLOUDINARY_API_SECRET"),
 }
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
