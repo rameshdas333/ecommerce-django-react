@@ -190,7 +190,7 @@ def get_product(request):
     return Response(
         {"detail": "Method not allowed."},
         status=status.HTTP_405_METHOD_NOT_ALLOWED,
-    )exit
+    )
 # =========================================================
 # SINGLE PRODUCT DETAILS
 # =========================================================
