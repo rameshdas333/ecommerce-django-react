@@ -23,7 +23,7 @@ from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import (
     FormParser,
     JSONParser,
@@ -90,6 +90,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 @api_view(["GET", "POST"])
 @permission_classes([IsAdminOrReadOnly])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def get_product(request):
 
     # =====================================================
