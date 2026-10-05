@@ -96,11 +96,24 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
+        name = validated_data.get("name")
+
+        if name:
+            validated_data["slug"] = slugify(name)
+
         return Product.objects.create(
             **validated_data
         )
 
     def update(self, instance, validated_data):
+
+        name = validated_data.get(
+            "name",
+            instance.name
+        )
+
+        if name:
+            validated_data["slug"] = slugify(name)
 
         for attr, value in validated_data.items():
             setattr(

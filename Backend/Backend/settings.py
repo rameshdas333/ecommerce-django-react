@@ -199,8 +199,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 GOOGLE_CLIENT_ID = "453299031822-tcsu6vhan0t6o9dv66k0etrh860c8cp0.apps.googleusercontent.com"
 
+
 if not DEBUG:
-  if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
