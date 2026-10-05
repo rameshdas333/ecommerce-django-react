@@ -52,6 +52,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     'django_filters',
+    'cloudinary_storage',
+    'django.contrib.staticfiles',
+    'cloudinary',
 ]
 
 REST_FRAMEWORK = {
@@ -212,3 +215,9 @@ CSRF_TRUSTED_ORIGINS = [
    "https://ecommerce-django-react-gules.vercel.app",
     "https://ecommerce-backend-s99l.onrender.com",
 ]
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'your_cloud_name',
+    'API_KEY': 'your_api_key',
+    'API_SECRET': 'your_api_secret'
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
