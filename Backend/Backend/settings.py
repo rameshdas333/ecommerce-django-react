@@ -31,10 +31,10 @@ DEBUG = config("DEBUG",cast=bool)
 AGE = config("AGE",cast = int)
 # render e host korer jonno change kora hoise
 ALLOWED_HOSTS = [
-      "localhost",
+    "localhost",
     "127.0.0.1",
     "ecommerce-django-react-gules.vercel.app",   #  Vercel frontend
-    ".onrender.com"  #render backend
+    "ecommerce-backend-s99l.onrender.com"  #render backend
 ]
 
 
@@ -169,8 +169,11 @@ USE_TZ = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://ecommerce-django-react-gules.vercel.app"
+    "http://127.0.0.1:5173",
+    "https://ecommerce-django-react-gules.vercel.app",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -184,7 +187,8 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # CompressedManifest-এর বদলে এটি ব্যবহার করলে ফাইল মিসিং এর কারণে অ্যাপ ক্র্যাশ করবে না
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
@@ -194,12 +198,17 @@ MEDIA_ROOT = BASE_DIR / "media"
 GOOGLE_CLIENT_ID = "453299031822-tcsu6vhan0t6o9dv66k0etrh860c8cp0.apps.googleusercontent.com"
 
 if not DEBUG:
+  if not DEBUG:
     SECURE_SSL_REDIRECT = True
-    CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    
+    # Cross-domain / Admin login fix
+    SESSION_COOKIE_SAMESITE = "None"
+    CSRF_COOKIE_SAMESITE = "None"
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://ecommerce-django-react-gules.vercel.app",
-    "https://*.onrender.com",
+   "https://ecommerce-django-react-gules.vercel.app",
+    "https://ecommerce-backend-s99l.onrender.com",
 ]
