@@ -254,16 +254,14 @@ ALLOWED_HOSTS = config(
 # অ্যাপ ডিক্লেয়ারেশন
 INSTALLED_APPS = [
     # staticfiles-এর আগে Cloudinary Storage থাকতে হবে
-    'cloudinary_storage',
+  
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary',
-    'django.contrib.staticfiles',
+     'django.contrib.staticfiles',
     
-    # থার্ড-পার্টি প্যাকেজ
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
@@ -403,7 +401,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
@@ -413,7 +411,8 @@ STORAGES = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME", default=""),
-    "API_KEY": config("CLOUDINARY_API_KEY", default=""),
-}
+# CLOUDINARY_STORAGE = {
+#     "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME", default=""),
+#     "API_KEY": config("CLOUDINARY_API_KEY", default=""),
+#     "API_SECRET": config("CLOUDINARY_API_SECRET", default=""),
+# }
